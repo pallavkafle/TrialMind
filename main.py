@@ -1,10 +1,11 @@
 from fastapi import FastAPI
-from routes import budget, route_opt
+from routes import budget, route_opt, itinerary
 
 app = FastAPI(title="TrailMind Intelligence Service")
 
 app.include_router(budget.router)
 app.include_router(route_opt.router)
+app.include_router(itinerary.router)
 
 @app.get("/")
 def health_check():
