@@ -1,62 +1,92 @@
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 import pickle
 
 np.random.seed(42)
-n = 800
+n = 1000
 
-# --- Real anchors (Nepal Tourism Statistics 2025) ---
-AVG_DAILY_SPEND_USD = 33.09          # Table 1
-USD_TO_NPR = 133                     # ASSUMPTION - update with live FX in prod
-AVG_DAILY_SPEND_NPR = AVG_DAILY_SPEND_USD * USD_TO_NPR   # ~4401 NPR/day baseline
-
+# --- Real anchors (NTB 2025) ---
 regions_weighted = (
     ["Annapurna"] * 25 + ["Khumbu"] * 20 + ["Langtang"] * 15 +
     ["Manaslu"] * 10 + ["Upper Mustang"] * 8 + ["Kanchanjunga"] * 7 +
     ["Lower Dolpa"] * 6 + ["Humla"] * 5 + ["Pokhara"] * 4
-)  # weighted by Table 5.2 popularity
+)
+purposes_weighted = ["Holiday"] * 602 + ["Pilgrimage"] * 144 + ["Trekking"] * 142 + ["Other"] * 112
+accom_tiers = ["budget", "mid", "luxury"]
+transport_modes = ["bus", "jeep", "flight", "trek"]
 
-purposes_weighted = (
-    ["Holiday"] * 602 + ["Pilgrimage"] * 144 +
-    ["Trekking"] * 142 + ["Other"] * 112
-)  # Table 4.1 real split, per 1000
-
-accom_tiers = ["budget", "mid", "luxury"]          # ASSUMPTION - no tier pricing in report
-transport_modes = ["bus", "jeep", "flight", "trek"]  # ASSUMPTION
+# Archetype classification per region (per report's γ categories)
+region_archetype = {
+    "Annapurna": "Trekking", "Khumbu": "Trekking", "Langtang": "Trekking",
+    "Manaslu": "Trekking", "Upper Mustang": "Trekking", "Kanchanjunga": "Trekking",
+    "Lower Dolpa": "Trekking", "Humla": "Trekking", "Pokhara": "Cultural"
+}
 
 df = pd.DataFrame({
     "region": np.random.choice(regions_weighted, n),
     "purpose": np.random.choice(purposes_weighted, n),
     "month": np.random.randint(1, 13, n),
-    # length of stay centered on real avg (16.34), with spread
     "days": np.clip(np.random.normal(16.34, 6, n), 1, 30).round().astype(int),
     "group_size": np.random.randint(1, 8, n),
     "accommodation_tier": np.random.choice(accom_tiers, n),
     "transport_mode": np.random.choice(transport_modes, n),
 })
+df["archetype"] = df["region"].map(region_archetype)
 
-# --- Cost model anchored to real avg daily spend ---
-tier_multiplier = {"budget": 0.6, "mid": 1.0, "luxury": 2.4}   # ASSUMPTION
-transport_flat = {"bus": 500, "jeep": 1500, "flight": 6000, "trek": 300}  # ASSUMPTION
-purpose_multiplier = {"Trekking": 1.3, "Pilgrimage": 0.9, "Holiday": 1.0, "Other": 1.1}  # ASSUMPTION
+# Trekking-trail walking distance approximation (not straight-line flight distance)
+region_km = {
+    "Annapurna": 160, "Khumbu": 130, "Langtang": 90, "Manaslu": 180,
+    "Upper Mustang": 200, "Kanchanjunga": 220, "Lower Dolpa": 250,
+    "Humla": 280, "Pokhara": 30
+}
+df["distance_km"] = df["region"].map(region_km)
+
+# Per-day baseline cost by tier (teahouse/hotel + food) — this was missing
+tier_daily_cost = {"budget": 2500, "mid": 4500, "luxury": 9000}  # NPR/day/person
+
+def transit_cost(row):
+    d = row["distance_km"]
+    if row["archetype"] == "Trekking":
+        # Alpine trek: always apply tiered rate regardless of 150km threshold on distance
+        first_leg = min(d, 100) * 5.00
+        remaining = max(d - 100, 0) * 18.00
+        return first_leg + remaining
+    else:
+        return d * 5.00
+
+FIXED_FEES = {"Trekking": 4500, "Wildlife": 3000, "Cultural": 1200}
+tier_multiplier = {"budget": 0.7, "mid": 1.0, "luxury": 2.2}
+
+df["c_transit"] = df.apply(transit_cost, axis=1)
+df["c_fixed"] = df["archetype"].map(FIXED_FEES).fillna(1200)
+df["c_daily"] = df["days"] * df["accommodation_tier"].map(tier_daily_cost)
 
 df["cost_npr"] = (
-    df["days"] * AVG_DAILY_SPEND_NPR * df["accommodation_tier"].map(tier_multiplier)
-    * df["purpose"].map(purpose_multiplier)
-    + df["transport_mode"].map(transport_flat)
-    + df["group_size"] * 200
-    + np.random.normal(0, 800, n)
-).clip(lower=500)
-
-X = pd.get_dummies(df.drop(columns=["cost_npr"]))
+    df["c_transit"] * df["accommodation_tier"].map(tier_multiplier)
+    + df["c_fixed"]
+    + df["c_daily"] * df["group_size"]  # daily lodging scales with group size too
+    + np.random.normal(0, 2000, n)
+).clip(lower=1500)
+# --- Stage 2: Random Forest trained on Algorithm-1-generated data ---
+feature_cols = ["region", "purpose", "month", "days", "group_size", "accommodation_tier", "transport_mode"]
+X = pd.get_dummies(df[feature_cols])
 y = df["cost_npr"]
 
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
 model = RandomForestRegressor(n_estimators=150, random_state=42)
-model.fit(X, y)
+model.fit(X_train, y_train)
+
+preds = model.predict(X_test)
+rmse = mean_squared_error(y_test, preds) ** 0.5
+mae = mean_absolute_error(y_test, preds)
+print(f"RMSE: {rmse:.2f} NPR")
+print(f"MAE: {mae:.2f} NPR")
 
 with open("models/budget_model.pkl", "wb") as f:
     pickle.dump({"model": model, "columns": X.columns.tolist()}, f)
 
-print("Model trained. Columns:", X.columns.tolist())
-print(f"Avg predicted cost: {model.predict(X).mean():.0f} NPR")
+print("Model trained and saved.")
