@@ -23,4 +23,4 @@ ml-service/cache/
 ml-service/routing/osm_cache/
 *.pyc
 .env
-.git_shreyash/
+
