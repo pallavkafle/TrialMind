@@ -235,3 +235,6 @@ def predict(req: BudgetRequest):
     )
 from api_routes import build_router
 app.include_router(build_router(DEST_META, COMPONENTS))
+
+from itinerary import build_itinerary_router
+app.include_router(build_itinerary_router(predict, BudgetRequest, transport_fare, DEST_META))
