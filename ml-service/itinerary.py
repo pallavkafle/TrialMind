@@ -183,7 +183,12 @@ HUMAN = (
     '"safety_notes": ["..."]}}\n\n'
     "Rules: exactly {total_days} entries in days, one per skeleton line; 3 or 4 "
     "activities per day; mention only places that belong to the day's location; "
-    "do not mention prices or permit fees."
+    "do not mention prices or permit fees. Day 1 must begin with the journey from "
+    "facts.start.city (facts.start.km km). The first day at each later stop must begin "
+    "with the transfer from the previous stop (use leg_km). Tips must be practical "
+    "(timing, what to bring, etiquette) and must not repeat altitude, distances or the "
+    "location name; use an empty string if there is nothing useful. Do not repeat the "
+    "same activity on consecutive days."
 )
 
 _llm = None
@@ -234,15 +239,25 @@ def _llm_plan(query, facts, skeleton, total_days) -> _LLMPlan:
     return plan
 
 
-def _fallback_days(order, alloc, leg_kms):
+def _fmt_km(km: float) -> str:
+    return f"{km:.0f}" if km >= 10 else f"{km:.1f}"
+
+
+def _fallback_days(order, alloc, leg_kms, start_city, start_km):
     out, n = [], 1
+    last_stop = len(order) - 1
     for idx, (stop, d) in enumerate(zip(order, alloc)):
         first, later = ACTIVITIES[DESTINATIONS[stop][2]]
         for k in range(d):
             acts = []
-            if k == 0 and idx > 0:
-                acts.append(f"Travel from {order[idx - 1]} (about {leg_kms[idx - 1]:.0f} km by road)")
-            acts += first if k == 0 else later
+            if k == 0 and idx == 0 and start_km >= 1:
+                acts.append(f"Travel from {start_city} to {stop} (about {_fmt_km(start_km)} km by road)")
+            elif k == 0 and idx > 0:
+                acts.append(f"Travel from {order[idx - 1]} (about {_fmt_km(leg_kms[idx - 1])} km by road)")
+            acts += first if k == 0 else [later[(k - 1) % len(later)]]
+            if k == d - 1:
+                acts.append("Check out and head home" if idx == last_stop
+                            else f"Pack up and prepare to move on to {order[idx + 1]}")
             out.append(DayOut(day=n, location=stop, title=f"Day {n}: {stop}", activities=acts))
             n += 1
     return out
@@ -277,7 +292,7 @@ def build_itinerary_router(predict_fn, budget_cls, transport_fare_fn, dest_meta)
 
         # 4. budget: per-stop components + start->first stop + inter-stop legs
         parts = {"permit": 0.0, "guide": 0.0, "porter": 0.0, "lodging": 0.0, "meals": 0.0}
-        first_transport = 0.0
+        first_transport, start_km = 0.0, 0.0
         for i, (stop, d) in enumerate(zip(order, alloc)):
             r = predict_fn(budget_cls(
                 starting_city=req.starting_city, destination=stop, duration_days=d,
@@ -294,6 +309,7 @@ def build_itinerary_router(predict_fn, budget_cls, transport_fare_fn, dest_meta)
             parts["meals"] += b.meals_npr
             if i == 0:
                 first_transport = b.transport_npr
+                start_km = r.start_to_dest_km
         transport = first_transport + sum(transport_fare_fn(km) * req.group_size for km in leg_kms)
         total = sum(parts.values()) + transport
         budget = BudgetInfo(
@@ -324,12 +340,13 @@ def build_itinerary_router(predict_fn, budget_cls, transport_fare_fn, dest_meta)
             "leg_km": leg_kms, "total_km": comp["total_km"], "month": req.travel_month,
             "group_size": req.group_size, "traveller_type": req.traveler_type,
             "accommodation": req.accommodation_tier,
+            "start": {"city": req.starting_city, "km": start_km},
         }
         warnings, source = [], "fallback"
         title = f"{req.duration_days}-day trip: {' → '.join(order)}"
         summary = (f"{len(order)} stop(s) over {req.duration_days} days, about "
                    f"{comp['total_km']:.0f} km of travel and walking in total.")
-        days = _fallback_days(order, alloc, leg_kms)
+        days = _fallback_days(order, alloc, leg_kms, req.starting_city, start_km)
         if req.use_llm:
             try:
                 plan = _llm_plan(req.query, facts, skeleton, req.duration_days)
