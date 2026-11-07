@@ -13,3 +13,5 @@ geopandas==1.0.1
 langchain-core==1.7.6
 langchain-google-genai==4.4.3
 python-dotenv==1.2.4
+transformers==5.22.2
+torch==2.15.0

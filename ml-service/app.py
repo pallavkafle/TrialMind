@@ -238,3 +238,6 @@ app.include_router(build_router(DEST_META, COMPONENTS))
 
 from itinerary import build_itinerary_router
 app.include_router(build_itinerary_router(predict, BudgetRequest, transport_fare, DEST_META))
+
+from safety import build_safety_router
+app.include_router(build_safety_router())
