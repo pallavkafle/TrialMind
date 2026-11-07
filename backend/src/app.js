@@ -1,3 +1,4 @@
+const mlRoutes = require("./routes/mlRoutes");
 const express = require("express");
 const authRoutes = require("./routes/authRoutes");
 const errorHandler = require("./middleware/errorHandler");
@@ -13,6 +14,7 @@ app.get("/api/health", (req, res) =>
 );
 
 app.use("/api/auth", authRoutes);
+app.use("/api/ml", mlRoutes);
 
 // unmatched routes
 app.use((req, res) =>
