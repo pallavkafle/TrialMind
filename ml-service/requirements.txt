@@ -5,4 +5,11 @@ joblib==1.4.2
 openpyxl==3.1.5
 fastapi==0.112.0
 uvicorn==0.30.5
-pydantic==2.8.2
+pydantic==2.14.3
+osmnx==2.1.1
+networkx==3.7
+folium==0.20.0
+geopandas==1.0.1
+langchain-core==1.7.6
+langchain-google-genai==4.4.3
+python-dotenv==1.2.4

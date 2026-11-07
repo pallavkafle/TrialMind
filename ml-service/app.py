@@ -233,3 +233,5 @@ def predict(req: BudgetRequest):
         starting_city=req.starting_city,
         porter_available=c["has_porter"],
     )
+from api_routes import build_router
+app.include_router(build_router(DEST_META, COMPONENTS))
