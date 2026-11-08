@@ -1,6 +1,7 @@
 const mlRoutes = require("./routes/mlRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
 const tripRoutes = require("./routes/tripRoutes");
+const healthRoutes = require("./routes/healthRoutes");
 const permitRoutes = require("./routes/permitRoutes");
 const express = require("express");
 const authRoutes = require("./routes/authRoutes");
@@ -21,6 +22,7 @@ app.use("/api/ml", mlRoutes);
 app.use("/api/trips", tripRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/permits", permitRoutes);
+app.use("/api/health-facilities", healthRoutes);
 
 // unmatched routes
 app.use((req, res) =>
