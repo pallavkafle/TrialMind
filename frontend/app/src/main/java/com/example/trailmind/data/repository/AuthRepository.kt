@@ -32,6 +32,7 @@ class AuthRepository(private val tokenStore: TokenStore) {
             val body = res.body()
             if (res.isSuccessful && body?.token != null && body.user != null) {
                 tokenStore.saveToken(body.token)
+                tokenStore.saveUser(body.user)
                 Resource.Success(body.user)
             } else {
                 Resource.Error(parseError(res.errorBody()?.string()))
