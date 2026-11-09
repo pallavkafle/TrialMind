@@ -37,6 +37,7 @@ fun HomeScreenWithDrawer(
     userEmail: String = "",
     onLogout: () -> Unit,
     onBudgetClick: () -> Unit = {},
+    onMyTripsClick: () -> Unit = {},
     // ✅ REPLACED onPlanTripClick with these two
     onStartAiChat: () -> Unit = {},
     onStartWizard: () -> Unit = {},
@@ -103,8 +104,10 @@ fun HomeScreenWithDrawer(
                         onClick = {
                             selectedItem = item.label
                             scope.launch { drawerState.close() }
-                            if (item.label == "Budget") onBudgetClick()
-                            // hook up real navigation per item later
+                            when (item.label) {
+                                "Budget" -> onBudgetClick()
+                                "My Trips" -> onMyTripsClick()
+                            }
                         },
                         colors = NavigationDrawerItemDefaults.colors(
                             selectedContainerColor = TrailBlueFaint,

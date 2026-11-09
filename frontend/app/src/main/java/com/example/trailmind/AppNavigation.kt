@@ -1,27 +1,27 @@
 package com.example.trailmind
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.trailmind.data.local.TokenStore
 import com.example.trailmind.ui.auth.LoginScreen
 import com.example.trailmind.ui.auth.RegisterScreen
 import com.example.trailmind.ui.budget.BudgetScreen
 import com.example.trailmind.ui.home.HomeScreenWithDrawer
+import com.example.trailmind.ui.plan.ItineraryScreen
+import com.example.trailmind.ui.plan.PlanTripScreen
+import com.example.trailmind.ui.plan.PlanTripViewModel
 import com.example.trailmind.ui.splash.SplashScreen
+import com.example.trailmind.ui.trips.MyTripsScreen
+import com.example.trailmind.ui.trips.SavedTripScreen
+import com.example.trailmind.util.Resource
 
 object Routes {
     const val SPLASH = "splash"
@@ -31,6 +31,10 @@ object Routes {
     const val BUDGET = "budget"
     const val TRIP_CHAT = "trip_chat"
     const val TRIP_WIZARD = "trip_wizard"
+    const val ITINERARY = "itinerary"
+    const val MY_TRIPS = "my_trips"
+    const val SAVED_TRIP = "saved/{id}"
+    fun savedTrip(id: String) = "saved/$id"
 }
 
 @Composable
@@ -38,6 +42,7 @@ fun AppNavigator() {
     val navController = rememberNavController()
     val context = LocalContext.current
     val tokenStore = remember { TokenStore(context) }
+    val planVm: PlanTripViewModel = viewModel()
 
     // go to a route and drop everything behind it, so Back can't return to login/splash
     fun goClearingStack(route: String) {
@@ -78,6 +83,7 @@ fun AppNavigator() {
                     goClearingStack(Routes.LOGIN)
                 },
                 onBudgetClick = { navController.navigate(Routes.BUDGET) },
+                onMyTripsClick = { navController.navigate(Routes.MY_TRIPS) },
                 onStartAiChat = { navController.navigate(Routes.TRIP_CHAT) },
                 onStartWizard = { navController.navigate(Routes.TRIP_WIZARD) },
                 onCategoryClick = { _ -> },
@@ -90,24 +96,55 @@ fun AppNavigator() {
         }
 
         composable(Routes.TRIP_CHAT) {
-            PlaceholderScreen("AI Chat Screen (Coming Soon)") { navController.popBackStack() }
+            PlanTripScreen(
+                isChat = true,
+                onBack = { navController.popBackStack() },
+                onResult = { navController.navigate(Routes.ITINERARY) },
+                viewModel = planVm
+            )
         }
 
         composable(Routes.TRIP_WIZARD) {
-            PlaceholderScreen("Guided Questions (Coming Soon)") { navController.popBackStack() }
+            PlanTripScreen(
+                isChat = false,
+                onBack = { navController.popBackStack() },
+                onResult = { navController.navigate(Routes.ITINERARY) },
+                viewModel = planVm
+            )
         }
-    }
-}
 
-@Composable
-fun PlaceholderScreen(title: String, onBack: () -> Unit) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(text = title)
-        Spacer(Modifier.height(16.dp))
-        Button(onClick = onBack) { Text("Back") }
+        composable(Routes.ITINERARY) {
+            // keep our own copy so the screen doesn't flicker when the plan screen clears its state
+            val data = remember { (planVm.itinerary.value as? Resource.Success)?.data }
+            val request = remember { planVm.lastRequest }
+            if (data == null || request == null) {
+                LaunchedEffect(Unit) { navController.popBackStack() }
+            } else {
+                ItineraryScreen(
+                    data = data,
+                    request = request,
+                    onBack = { navController.popBackStack() },
+                    viewModel = planVm
+                )
+            }
+        }
+
+        composable(Routes.MY_TRIPS) {
+            MyTripsScreen(
+                onBack = { navController.popBackStack() },
+                onOpenTrip = { id -> navController.navigate(Routes.savedTrip(id)) }
+            )
+        }
+
+        composable(
+            Routes.SAVED_TRIP,
+            arguments = listOf(navArgument("id") { type = NavType.StringType })
+        ) { entry ->
+            SavedTripScreen(
+                id = entry.arguments?.getString("id").orEmpty(),
+                onBack = { navController.popBackStack() },
+                planVm = planVm
+            )
+        }
     }
 }
