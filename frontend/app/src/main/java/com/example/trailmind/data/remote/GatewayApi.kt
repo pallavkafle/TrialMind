@@ -5,6 +5,7 @@ import com.example.trailmind.data.remote.dto.BudgetResponse
 import com.example.trailmind.data.remote.dto.DestinationDto
 import com.example.trailmind.data.remote.dto.ItineraryRequest
 import com.example.trailmind.data.remote.dto.ItineraryResponse
+import com.example.trailmind.data.remote.dto.NearestFacilitiesResponse
 import com.example.trailmind.data.remote.dto.PermitCheckRequest
 import com.example.trailmind.data.remote.dto.PermitCheckResponse
 import com.example.trailmind.data.remote.dto.SaveTripRequest
@@ -17,6 +18,7 @@ import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 // every Node response looks like { success, message?, data? }
 data class ApiEnvelope<T>(val success: Boolean, val message: String? = null, val data: T? = null)
@@ -45,4 +47,15 @@ interface GatewayApi {
 
     @POST("api/permits/check")
     suspend fun checkPermits(@Body body: PermitCheckRequest): Response<ApiEnvelope<PermitCheckResponse>>
+
+    // public route: works without a valid login
+    @GET("api/health-facilities/nearest")
+    suspend fun nearestFacilities(
+        @Query("destination") destination: String?,
+        @Query("lat") lat: Double?,
+        @Query("lon") lon: Double?,
+        @Query("type") type: String?,
+        @Query("limit") limit: Int?,
+        @Query("radius_km") radiusKm: Int?
+    ): Response<ApiEnvelope<NearestFacilitiesResponse>>
 }

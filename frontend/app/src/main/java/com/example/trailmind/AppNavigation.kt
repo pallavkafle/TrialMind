@@ -15,6 +15,7 @@ import com.example.trailmind.ui.auth.LoginScreen
 import com.example.trailmind.ui.auth.RegisterScreen
 import com.example.trailmind.ui.budget.BudgetScreen
 import com.example.trailmind.ui.components.ComingSoonScreen
+import com.example.trailmind.ui.emergency.EmergencyScreen
 import com.example.trailmind.ui.home.HomeScreenWithDrawer
 import com.example.trailmind.ui.permits.PermitsScreen
 import com.example.trailmind.ui.plan.ItineraryScreen
@@ -37,6 +38,7 @@ object Routes {
     const val MY_TRIPS = "my_trips"
     const val SAVED_TRIP = "saved/{id}"
     const val PERMITS = "permits"
+    const val EMERGENCY = "emergency"
     const val COMING_SOON = "soon/{name}"
     fun savedTrip(id: String) = "saved/$id"
     fun comingSoon(name: String) = "soon/$name"
@@ -94,6 +96,7 @@ fun AppNavigator() {
                 onCategoryClick = { route ->
                     when (route) {
                         "permits" -> navController.navigate(Routes.PERMITS)
+                        "emergency" -> navController.navigate(Routes.EMERGENCY)
                         else -> navController.navigate(Routes.comingSoon(route))
                     }
                 },
@@ -159,6 +162,10 @@ fun AppNavigator() {
 
         composable(Routes.PERMITS) {
             PermitsScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable(Routes.EMERGENCY) {
+            EmergencyScreen(onBack = { navController.popBackStack() })
         }
 
         composable(
