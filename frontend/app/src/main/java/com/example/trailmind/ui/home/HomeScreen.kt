@@ -52,14 +52,14 @@ data class PopularPlace(
 // STATIC DATA
 // ─────────────────────────────────────────────
 
-// ✅ FIXED: "Beaches" is now "Treks" with Terrain icon
+
 val categories = listOf(
-    CategoryItem("Hotels",   Icons.Default.Hotel,          "hotels"),
-    CategoryItem("Flights",  Icons.Default.Flight,         "flights"),
-    CategoryItem("Buses",    Icons.Default.DirectionsBus,  "buses"),
-    CategoryItem("Places",   Icons.Default.Place,          "places"),
-    CategoryItem("Foods",    Icons.Default.Restaurant,     "foods"),
-    CategoryItem("Treks",    Icons.Default.Terrain,        "treks")   // CHANGED
+    CategoryItem("Hotels", Icons.Default.Hotel, "hotels"),
+    CategoryItem("Currency", Icons.Default.CurrencyExchange, "currency"),
+    CategoryItem("Emergency", Icons.Default.LocalHospital, "emergency"),
+    CategoryItem("Places", Icons.Default.Place, "places"),
+    CategoryItem("Trekking", Icons.Default.Terrain, "trekking"),
+    CategoryItem("Permits", Icons.Default.Badge, "permits")
 )
 
 val popularPlaces = listOf(

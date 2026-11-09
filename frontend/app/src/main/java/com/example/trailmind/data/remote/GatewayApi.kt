@@ -5,6 +5,8 @@ import com.example.trailmind.data.remote.dto.BudgetResponse
 import com.example.trailmind.data.remote.dto.DestinationDto
 import com.example.trailmind.data.remote.dto.ItineraryRequest
 import com.example.trailmind.data.remote.dto.ItineraryResponse
+import com.example.trailmind.data.remote.dto.PermitCheckRequest
+import com.example.trailmind.data.remote.dto.PermitCheckResponse
 import com.example.trailmind.data.remote.dto.SaveTripRequest
 import com.example.trailmind.data.remote.dto.SavedTripDto
 import com.example.trailmind.data.remote.dto.TripDetailDto
@@ -40,4 +42,7 @@ interface GatewayApi {
 
     @DELETE("api/trips/{id}")
     suspend fun deleteTrip(@Path("id") id: String): Response<ApiEnvelope<Unit>>
+
+    @POST("api/permits/check")
+    suspend fun checkPermits(@Body body: PermitCheckRequest): Response<ApiEnvelope<PermitCheckResponse>>
 }

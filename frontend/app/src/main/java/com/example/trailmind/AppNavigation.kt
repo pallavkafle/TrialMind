@@ -14,7 +14,9 @@ import com.example.trailmind.data.local.TokenStore
 import com.example.trailmind.ui.auth.LoginScreen
 import com.example.trailmind.ui.auth.RegisterScreen
 import com.example.trailmind.ui.budget.BudgetScreen
+import com.example.trailmind.ui.components.ComingSoonScreen
 import com.example.trailmind.ui.home.HomeScreenWithDrawer
+import com.example.trailmind.ui.permits.PermitsScreen
 import com.example.trailmind.ui.plan.ItineraryScreen
 import com.example.trailmind.ui.plan.PlanTripScreen
 import com.example.trailmind.ui.plan.PlanTripViewModel
@@ -34,7 +36,10 @@ object Routes {
     const val ITINERARY = "itinerary"
     const val MY_TRIPS = "my_trips"
     const val SAVED_TRIP = "saved/{id}"
+    const val PERMITS = "permits"
+    const val COMING_SOON = "soon/{name}"
     fun savedTrip(id: String) = "saved/$id"
+    fun comingSoon(name: String) = "soon/$name"
 }
 
 @Composable
@@ -86,7 +91,12 @@ fun AppNavigator() {
                 onMyTripsClick = { navController.navigate(Routes.MY_TRIPS) },
                 onStartAiChat = { navController.navigate(Routes.TRIP_CHAT) },
                 onStartWizard = { navController.navigate(Routes.TRIP_WIZARD) },
-                onCategoryClick = { _ -> },
+                onCategoryClick = { route ->
+                    when (route) {
+                        "permits" -> navController.navigate(Routes.PERMITS)
+                        else -> navController.navigate(Routes.comingSoon(route))
+                    }
+                },
                 onPlaceClick = { _ -> }
             )
         }
@@ -144,6 +154,20 @@ fun AppNavigator() {
                 id = entry.arguments?.getString("id").orEmpty(),
                 onBack = { navController.popBackStack() },
                 planVm = planVm
+            )
+        }
+
+        composable(Routes.PERMITS) {
+            PermitsScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable(
+            Routes.COMING_SOON,
+            arguments = listOf(navArgument("name") { type = NavType.StringType })
+        ) { entry ->
+            ComingSoonScreen(
+                name = entry.arguments?.getString("name").orEmpty(),
+                onBack = { navController.popBackStack() }
             )
         }
     }
