@@ -3,6 +3,8 @@ const reviewRoutes = require("./routes/reviewRoutes");
 const tripRoutes = require("./routes/tripRoutes");
 const healthRoutes = require("./routes/healthRoutes");
 const permitRoutes = require("./routes/permitRoutes");
+const weatherRoutes = require("./routes/weatherRoutes");
+const currencyRoutes = require("./routes/currencyRoutes");
 const express = require("express");
 const authRoutes = require("./routes/authRoutes");
 const errorHandler = require("./middleware/errorHandler");
@@ -23,6 +25,8 @@ app.use("/api/trips", tripRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/permits", permitRoutes);
 app.use("/api/health-facilities", healthRoutes);
+app.use("/api/weather", weatherRoutes);
+app.use("/api/currency", currencyRoutes);
 
 // unmatched routes
 app.use((req, res) =>
