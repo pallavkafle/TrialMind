@@ -27,6 +27,8 @@ import com.example.trailmind.ui.components.InfoTag
 import com.example.trailmind.ui.components.RatingStars
 import com.example.trailmind.ui.components.SectionCard
 import com.example.trailmind.ui.home.TrailBlue
+import com.example.trailmind.ui.weather.WeatherCard
+import com.example.trailmind.ui.weather.WeatherViewModel
 import com.example.trailmind.util.Resource
 import com.example.trailmind.util.formatIsoDate
 
@@ -43,12 +45,14 @@ fun PlaceDetailScreen(
     onBack: () -> Unit,
     onWriteReview: () -> Unit,
     placesVm: PlacesViewModel,
-    viewModel: PlaceDetailViewModel = viewModel()
+    viewModel: PlaceDetailViewModel = viewModel(),
+    weatherVm: WeatherViewModel = viewModel()
 ) {
     val places by placesVm.destinations.collectAsState()
     val state by viewModel.state.collectAsState()
     val mine by viewModel.mine.collectAsState()
     val message by viewModel.message.collectAsState()
+    val weather by weatherVm.state.collectAsState()
     val snackbar = remember { SnackbarHostState() }
     var toDelete by remember { mutableStateOf<ReviewDto?>(null) }
 
@@ -67,6 +71,11 @@ fun PlaceDetailScreen(
     val dest: DestinationDto? = when (val p = places) {
         is Resource.Success -> p.data.firstOrNull { it.name == name }
         else -> null
+    }
+
+    // the forecast needs the destination's coordinates, so it starts once the destination is known
+    LaunchedEffect(dest) {
+        dest?.let { weatherVm.load(it.latitude, it.longitude) }
     }
 
     Scaffold(
@@ -115,6 +124,15 @@ fun PlaceDetailScreen(
         ) {
             HeaderCard(name, dest)
             Spacer(Modifier.height(14.dp))
+
+            if (dest != null) {
+                WeatherCard(
+                    state = weather,
+                    highestM = dest.altitude_m,
+                    onRetry = { weatherVm.load(dest.latitude, dest.longitude, force = true) }
+                )
+                Spacer(Modifier.height(14.dp))
+            }
 
             when (val s = state) {
                 null, is Resource.Loading -> Box(

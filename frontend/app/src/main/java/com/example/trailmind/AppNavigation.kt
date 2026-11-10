@@ -16,6 +16,7 @@ import com.example.trailmind.ui.auth.LoginScreen
 import com.example.trailmind.ui.auth.RegisterScreen
 import com.example.trailmind.ui.budget.BudgetScreen
 import com.example.trailmind.ui.components.ComingSoonScreen
+import com.example.trailmind.ui.currency.CurrencyScreen
 import com.example.trailmind.ui.emergency.EmergencyScreen
 import com.example.trailmind.ui.home.HomeScreenWithDrawer
 import com.example.trailmind.ui.permits.PermitsScreen
@@ -44,6 +45,7 @@ object Routes {
     const val SAVED_TRIP = "saved/{id}"
     const val PERMITS = "permits"
     const val EMERGENCY = "emergency"
+    const val CURRENCY = "currency"
     const val PLACES = "places/{category}"
     const val PLACE = "place/{name}"
     const val WRITE_REVIEW = "review/{name}"
@@ -110,6 +112,7 @@ fun AppNavigator() {
                     when (route) {
                         "permits" -> navController.navigate(Routes.PERMITS)
                         "emergency" -> navController.navigate(Routes.EMERGENCY)
+                        "currency" -> navController.navigate(Routes.CURRENCY)
                         "places" -> navController.navigate(Routes.places("All"))
                         "trekking" -> navController.navigate(Routes.places("Trekking"))
                         else -> navController.navigate(Routes.comingSoon(route))
@@ -181,6 +184,10 @@ fun AppNavigator() {
 
         composable(Routes.EMERGENCY) {
             EmergencyScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable(Routes.CURRENCY) {
+            CurrencyScreen(onBack = { navController.popBackStack() })
         }
 
         composable(

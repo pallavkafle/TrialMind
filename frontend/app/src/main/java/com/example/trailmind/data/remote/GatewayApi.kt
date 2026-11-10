@@ -3,6 +3,7 @@ package com.example.trailmind.data.remote
 import com.example.trailmind.data.remote.dto.BudgetRequest
 import com.example.trailmind.data.remote.dto.BudgetResponse
 import com.example.trailmind.data.remote.dto.CreateReviewRequest
+import com.example.trailmind.data.remote.dto.CurrencyRatesDto
 import com.example.trailmind.data.remote.dto.DestinationDto
 import com.example.trailmind.data.remote.dto.ItineraryRequest
 import com.example.trailmind.data.remote.dto.ItineraryResponse
@@ -15,6 +16,7 @@ import com.example.trailmind.data.remote.dto.SaveTripRequest
 import com.example.trailmind.data.remote.dto.SavedTripDto
 import com.example.trailmind.data.remote.dto.TripDetailDto
 import com.example.trailmind.data.remote.dto.TripSummaryDto
+import com.example.trailmind.data.remote.dto.WeatherDto
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -77,4 +79,13 @@ interface GatewayApi {
 
     @DELETE("api/reviews/{id}")
     suspend fun deleteReview(@Path("id") id: String): Response<ApiEnvelope<Unit>>
+
+    @GET("api/weather")
+    suspend fun weather(
+        @Query("lat") lat: Double,
+        @Query("lon") lon: Double
+    ): Response<ApiEnvelope<WeatherDto>>
+
+    @GET("api/currency/rates")
+    suspend fun currencyRates(): Response<ApiEnvelope<CurrencyRatesDto>>
 }
