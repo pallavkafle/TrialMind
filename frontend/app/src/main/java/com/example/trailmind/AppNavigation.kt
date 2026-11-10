@@ -1,5 +1,6 @@
 package com.example.trailmind
 
+import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -18,6 +19,10 @@ import com.example.trailmind.ui.components.ComingSoonScreen
 import com.example.trailmind.ui.emergency.EmergencyScreen
 import com.example.trailmind.ui.home.HomeScreenWithDrawer
 import com.example.trailmind.ui.permits.PermitsScreen
+import com.example.trailmind.ui.places.PlaceDetailScreen
+import com.example.trailmind.ui.places.PlacesScreen
+import com.example.trailmind.ui.places.PlacesViewModel
+import com.example.trailmind.ui.places.WriteReviewScreen
 import com.example.trailmind.ui.plan.ItineraryScreen
 import com.example.trailmind.ui.plan.PlanTripScreen
 import com.example.trailmind.ui.plan.PlanTripViewModel
@@ -39,8 +44,15 @@ object Routes {
     const val SAVED_TRIP = "saved/{id}"
     const val PERMITS = "permits"
     const val EMERGENCY = "emergency"
+    const val PLACES = "places/{category}"
+    const val PLACE = "place/{name}"
+    const val WRITE_REVIEW = "review/{name}"
     const val COMING_SOON = "soon/{name}"
     fun savedTrip(id: String) = "saved/$id"
+    fun places(category: String) = "places/$category"
+    // destination names contain spaces, slashes and brackets, so they must be encoded in the route
+    fun place(name: String) = "place/${Uri.encode(name)}"
+    fun writeReview(name: String) = "review/${Uri.encode(name)}"
     fun comingSoon(name: String) = "soon/$name"
 }
 
@@ -50,6 +62,7 @@ fun AppNavigator() {
     val context = LocalContext.current
     val tokenStore = remember { TokenStore(context) }
     val planVm: PlanTripViewModel = viewModel()
+    val placesVm: PlacesViewModel = viewModel()
 
     // go to a route and drop everything behind it, so Back can't return to login/splash
     fun goClearingStack(route: String) {
@@ -97,6 +110,8 @@ fun AppNavigator() {
                     when (route) {
                         "permits" -> navController.navigate(Routes.PERMITS)
                         "emergency" -> navController.navigate(Routes.EMERGENCY)
+                        "places" -> navController.navigate(Routes.places("All"))
+                        "trekking" -> navController.navigate(Routes.places("Trekking"))
                         else -> navController.navigate(Routes.comingSoon(route))
                     }
                 },
@@ -166,6 +181,43 @@ fun AppNavigator() {
 
         composable(Routes.EMERGENCY) {
             EmergencyScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable(
+            Routes.PLACES,
+            arguments = listOf(navArgument("category") { type = NavType.StringType })
+        ) { entry ->
+            PlacesScreen(
+                initialCategory = entry.arguments?.getString("category").orEmpty(),
+                onBack = { navController.popBackStack() },
+                onOpen = { name -> navController.navigate(Routes.place(name)) },
+                viewModel = placesVm
+            )
+        }
+
+        composable(
+            Routes.PLACE,
+            arguments = listOf(navArgument("name") { type = NavType.StringType })
+        ) { entry ->
+            val name = Uri.decode(entry.arguments?.getString("name").orEmpty())
+            PlaceDetailScreen(
+                name = name,
+                onBack = { navController.popBackStack() },
+                onWriteReview = { navController.navigate(Routes.writeReview(name)) },
+                placesVm = placesVm
+            )
+        }
+
+        composable(
+            Routes.WRITE_REVIEW,
+            arguments = listOf(navArgument("name") { type = NavType.StringType })
+        ) { entry ->
+            val name = Uri.decode(entry.arguments?.getString("name").orEmpty())
+            WriteReviewScreen(
+                name = name,
+                onBack = { navController.popBackStack() },
+                onDone = { navController.popBackStack() }
+            )
         }
 
         composable(

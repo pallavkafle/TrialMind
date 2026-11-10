@@ -2,12 +2,15 @@ package com.example.trailmind.data.remote
 
 import com.example.trailmind.data.remote.dto.BudgetRequest
 import com.example.trailmind.data.remote.dto.BudgetResponse
+import com.example.trailmind.data.remote.dto.CreateReviewRequest
 import com.example.trailmind.data.remote.dto.DestinationDto
 import com.example.trailmind.data.remote.dto.ItineraryRequest
 import com.example.trailmind.data.remote.dto.ItineraryResponse
 import com.example.trailmind.data.remote.dto.NearestFacilitiesResponse
 import com.example.trailmind.data.remote.dto.PermitCheckRequest
 import com.example.trailmind.data.remote.dto.PermitCheckResponse
+import com.example.trailmind.data.remote.dto.ReviewDto
+import com.example.trailmind.data.remote.dto.ReviewListResponse
 import com.example.trailmind.data.remote.dto.SaveTripRequest
 import com.example.trailmind.data.remote.dto.SavedTripDto
 import com.example.trailmind.data.remote.dto.TripDetailDto
@@ -58,4 +61,20 @@ interface GatewayApi {
         @Query("limit") limit: Int?,
         @Query("radius_km") radiusKm: Int?
     ): Response<ApiEnvelope<NearestFacilitiesResponse>>
+
+    // public: answers { success, summary, data }
+    @GET("api/reviews")
+    suspend fun reviews(
+        @Query("destination") destination: String,
+        @Query("limit") limit: Int
+    ): Response<ReviewListResponse>
+
+    @GET("api/reviews/mine")
+    suspend fun myReviews(): Response<ApiEnvelope<List<ReviewDto>>>
+
+    @POST("api/reviews")
+    suspend fun createReview(@Body body: CreateReviewRequest): Response<ApiEnvelope<ReviewDto>>
+
+    @DELETE("api/reviews/{id}")
+    suspend fun deleteReview(@Path("id") id: String): Response<ApiEnvelope<Unit>>
 }
