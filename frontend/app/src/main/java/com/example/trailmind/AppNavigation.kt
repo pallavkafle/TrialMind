@@ -1,9 +1,11 @@
 package com.example.trailmind
 
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -12,6 +14,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.trailmind.data.local.TokenStore
+import com.example.trailmind.data.remote.SessionEvents
+import com.example.trailmind.data.repository.AuthRepository
+import com.example.trailmind.data.repository.SessionState
 import com.example.trailmind.ui.auth.LoginScreen
 import com.example.trailmind.ui.auth.RegisterScreen
 import com.example.trailmind.ui.budget.BudgetScreen
@@ -31,6 +36,8 @@ import com.example.trailmind.ui.splash.SplashScreen
 import com.example.trailmind.ui.trips.MyTripsScreen
 import com.example.trailmind.ui.trips.SavedTripScreen
 import com.example.trailmind.util.Resource
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 object Routes {
     const val SPLASH = "splash"
@@ -63,6 +70,8 @@ fun AppNavigator() {
     val navController = rememberNavController()
     val context = LocalContext.current
     val tokenStore = remember { TokenStore(context) }
+    val authRepo = remember { AuthRepository(tokenStore) }
+    val scope = rememberCoroutineScope()
     val planVm: PlanTripViewModel = viewModel()
     val placesVm: PlacesViewModel = viewModel()
 
@@ -71,12 +80,35 @@ fun AppNavigator() {
         navController.navigate(route) { popUpTo(0) { inclusive = true } }
     }
 
+    // any protected request that answers 401 means the saved login expired: back to Login
+    LaunchedEffect(Unit) {
+        SessionEvents.unauthorized.collect {
+            tokenStore.clear()
+            if (navController.currentDestination?.route != Routes.LOGIN) {
+                Toast.makeText(context, "Your session expired. Please log in again.", Toast.LENGTH_LONG).show()
+                goClearingStack(Routes.LOGIN)
+            }
+        }
+    }
+
     NavHost(navController = navController, startDestination = Routes.SPLASH) {
 
         composable(Routes.SPLASH) {
             SplashScreen(
                 onSplashFinished = {
-                    goClearingStack(if (tokenStore.getToken() != null) Routes.HOME else Routes.LOGIN)
+                    scope.launch {
+                        val hadToken = tokenStore.getToken() != null
+                        val state = if (hadToken) {
+                            // wait at most 3 seconds; if the server cannot be reached the user still gets in
+                            withTimeoutOrNull(3000) { authRepo.validateSession() } ?: SessionState.UNKNOWN
+                        } else {
+                            SessionState.LOGGED_OUT
+                        }
+                        if (hadToken && state == SessionState.LOGGED_OUT) {
+                            Toast.makeText(context, "Your session expired. Please log in again.", Toast.LENGTH_LONG).show()
+                        }
+                        goClearingStack(if (state == SessionState.LOGGED_OUT) Routes.LOGIN else Routes.HOME)
+                    }
                 }
             )
         }
