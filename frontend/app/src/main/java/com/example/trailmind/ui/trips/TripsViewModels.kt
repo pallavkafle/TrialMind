@@ -19,23 +19,34 @@ class MyTripsViewModel : ViewModel() {
     private val _message = MutableStateFlow<String?>(null)
     val message: StateFlow<String?> = _message
 
+    // trips whose delete request is already on its way, so a double tap sends only one
+    private val deleting = mutableSetOf<String>()
+
     fun load() {
         _trips.value = Resource.Loading
         viewModelScope.launch { _trips.value = repo.myTrips() }
     }
 
     fun delete(id: String) {
+        if (!deleting.add(id)) return
         viewModelScope.launch {
             when (val r = repo.deleteTrip(id)) {
-                is Resource.Success -> {
-                    val current = _trips.value as? Resource.Success<List<TripSummaryDto>>
-                    if (current != null) {
-                        _trips.value = Resource.Success(current.data.filterNot { it.id == id })
-                    }
+                is Resource.Success -> removeFromList(id)
+                is Resource.Error -> {
+                    // "not found" means it is already gone, so just drop it from the list
+                    if (r.message.contains("not found", ignoreCase = true)) removeFromList(id)
+                    else _message.value = r.message
                 }
-                is Resource.Error -> _message.value = r.message
                 else -> {}
             }
+            deleting.remove(id)
+        }
+    }
+
+    private fun removeFromList(id: String) {
+        val current = _trips.value as? Resource.Success<List<TripSummaryDto>>
+        if (current != null) {
+            _trips.value = Resource.Success(current.data.filterNot { it.id == id })
         }
     }
 

@@ -41,14 +41,18 @@ private fun npr(v: Double) = "NPR ${"%,.0f".format(v)}"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PermitsScreen(onBack: () -> Unit, viewModel: PermitsViewModel = viewModel()) {
+fun PermitsScreen(
+    onBack: () -> Unit,
+    defaultNationality: String,
+    viewModel: PermitsViewModel = viewModel()
+) {
     val selected = rememberSaveable(
         saver = listSaver<SnapshotStateList<String>, String>(
             save = { it.toList() },
             restore = { it.toMutableStateList() }
         )
     ) { mutableStateListOf<String>() }
-    var nationality by rememberSaveable { mutableStateOf("Foreign") }
+    var nationality by rememberSaveable { mutableStateOf(defaultNationality) }
     var days by rememberSaveable { mutableStateOf("7") }
     var group by rememberSaveable { mutableStateOf("2") }
     var month by rememberSaveable { mutableStateOf("October") }
@@ -162,17 +166,29 @@ private fun PermitResult(r: PermitCheckResponse) {
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(Modifier.padding(20.dp)) {
-            Text("Estimated permits & fees", fontSize = 12.sp, color = TextMuted)
-            Text(npr(r.total_npr), fontSize = 28.sp, fontWeight = FontWeight.Bold, color = TrailBlue)
-            Text(
-                "${npr(r.total_per_person_npr)} per person · ${r.nationality_category} · ${r.group_size} people",
-                fontSize = 13.sp, color = TextMuted
-            )
-            Spacer(Modifier.height(14.dp))
             if (r.permits.isEmpty()) {
-                Text("No permits found in our data for these destinations.", fontSize = 13.sp, color = TextMuted)
+                // no data is not the same as "free", so no NPR 0 is shown
+                Text("No fee data for these places", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextDark)
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    "We have no permit or entry-fee information for the places you chose. " +
+                        "Fees may still apply, so ask at the gate or the local office before you go.",
+                    fontSize = 13.sp, color = TextMuted
+                )
+            } else {
+                val partial = r.permits.any { it.fee_per_person_npr == null }
+                Text(
+                    if (partial) "Known permits & fees (some fees not found)" else "Estimated permits & fees",
+                    fontSize = 12.sp, color = TextMuted
+                )
+                Text(npr(r.total_npr), fontSize = 28.sp, fontWeight = FontWeight.Bold, color = TrailBlue)
+                Text(
+                    "${npr(r.total_per_person_npr)} per person · ${r.nationality_category} · ${r.group_size} people",
+                    fontSize = 13.sp, color = TextMuted
+                )
+                Spacer(Modifier.height(14.dp))
+                r.permits.forEach { PermitRow(it) }
             }
-            r.permits.forEach { PermitRow(it) }
         }
     }
 

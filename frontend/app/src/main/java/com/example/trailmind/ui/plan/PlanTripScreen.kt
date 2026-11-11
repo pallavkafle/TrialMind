@@ -12,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -22,7 +21,6 @@ import androidx.compose.ui.unit.sp
 import com.example.trailmind.data.remote.dto.ItineraryRequest
 import com.example.trailmind.ui.components.*
 import com.example.trailmind.ui.home.TrailBlue
-import com.example.trailmind.ui.home.TrailBlueFaint
 import com.example.trailmind.util.Resource
 
 private val TextMuted = Color(0xFF6B7280)
@@ -36,13 +34,13 @@ private val nationalities = listOf("Domestic", "SAARC", "Foreign")
 private val travelerTypes = listOf("Solo", "Group")
 private val tiers = listOf("Budget", "Standard", "Luxury")
 private val transports = listOf("Public Bus", "Private Jeep", "Flight")
-private val categoryOrder = listOf("Cultural", "Trekking", "Hiking", "Homestay", "Wildlife")
 private const val MAX_STOPS = 10
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlanTripScreen(
     isChat: Boolean,
+    defaultNationality: String,
     onBack: () -> Unit,
     onResult: () -> Unit,
     viewModel: PlanTripViewModel
@@ -59,14 +57,13 @@ fun PlanTripScreen(
     var days by rememberSaveable { mutableStateOf("7") }
     var group by rememberSaveable { mutableStateOf("2") }
     var month by rememberSaveable { mutableStateOf(months.first()) }
-    var nationality by rememberSaveable { mutableStateOf(nationalities.first()) }
+    var nationality by rememberSaveable { mutableStateOf(defaultNationality) }
     var travelerType by rememberSaveable { mutableStateOf(travelerTypes.last()) }
     var tier by rememberSaveable { mutableStateOf(tiers[1]) }
     var transport by rememberSaveable { mutableStateOf(transports.first()) }
     var useGuide by rememberSaveable { mutableStateOf(true) }
     var usePorter by rememberSaveable { mutableStateOf(true) }
     var localError by remember { mutableStateOf<String?>(null) }
-    var requested by remember { mutableStateOf(false) }
 
     val destinations by viewModel.destinations.collectAsState()
     val itinerary by viewModel.itinerary.collectAsState()
@@ -78,12 +75,9 @@ fun PlanTripScreen(
         viewModel.loadDestinations()
     }
 
-    // open the itinerary screen only after the user asked for one on this screen
+    // a plan the user asked for is ready (also when they left this screen and came back)
     LaunchedEffect(itinerary) {
-        if (requested && itinerary is Resource.Success) {
-            requested = false
-            onResult()
-        }
+        if (viewModel.takeReadyResult()) onResult()
     }
 
     Scaffold(
@@ -135,45 +129,7 @@ fun PlanTripScreen(
                 }
             } else {
                 SectionCard(title = "Where to?", icon = Icons.Default.Flag) {
-                    when (val d = destinations) {
-                        is Resource.Loading, null -> CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.dp)
-                        is Resource.Error -> {
-                            ErrorBox(d.message)
-                            TextButton(onClick = { viewModel.loadDestinations() }) { Text("Retry") }
-                        }
-                        is Resource.Success -> {
-                            val byCategory = d.data.groupBy { it.category }
-                            categoryOrder.forEach { cat ->
-                                val items = byCategory[cat].orEmpty()
-                                if (items.isNotEmpty()) {
-                                    Text(cat, fontSize = 12.sp, color = TextMuted, fontWeight = FontWeight.SemiBold)
-                                    Spacer(Modifier.height(6.dp))
-                                    FlowRow(
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        items.forEach { dest ->
-                                            val isOn = dest.name in selected
-                                            FilterChip(
-                                                selected = isOn,
-                                                onClick = {
-                                                    if (isOn) selected.remove(dest.name)
-                                                    else if (selected.size < MAX_STOPS) selected.add(dest.name)
-                                                },
-                                                label = { Text(dest.name, fontSize = 12.sp) },
-                                                colors = FilterChipDefaults.filterChipColors(
-                                                    selectedContainerColor = TrailBlueFaint,
-                                                    selectedLabelColor = TrailBlue
-                                                )
-                                            )
-                                        }
-                                    }
-                                    Spacer(Modifier.height(12.dp))
-                                }
-                            }
-                            Text("Selected ${selected.size}/$MAX_STOPS", fontSize = 12.sp, color = TextMuted)
-                        }
-                    }
+                    DestinationChips(destinations, selected, MAX_STOPS) { viewModel.loadDestinations() }
                 }
             }
 
@@ -228,7 +184,6 @@ fun PlanTripScreen(
                     }
                     if (localError == null) {
                         keyboard?.hide()
-                        requested = true
                         viewModel.generate(
                             ItineraryRequest(
                                 query = if (isChat) query.trim() else "",
@@ -267,7 +222,7 @@ fun PlanTripScreen(
             localError?.let { ErrorBox(it) }
             when (val s = itinerary) {
                 is Resource.Loading ->
-                    Text("Creating your itinerary… this can take up to a minute.", fontSize = 13.sp, color = TextMuted)
+                    Text("Creating your itinerary… this can take a minute.", fontSize = 13.sp, color = TextMuted)
                 is Resource.Error -> ErrorBox(s.message)
                 else -> {}
             }

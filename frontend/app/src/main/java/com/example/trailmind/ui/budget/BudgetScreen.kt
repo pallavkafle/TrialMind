@@ -3,9 +3,7 @@ package com.example.trailmind.ui.budget
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -18,15 +16,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.trailmind.data.remote.dto.BudgetRequest
+import com.example.trailmind.ui.components.Dropdown
+import com.example.trailmind.ui.components.ErrorBox
+import com.example.trailmind.ui.components.NumberField
+import com.example.trailmind.ui.components.SectionCard
+import com.example.trailmind.ui.components.ToggleRow
+import com.example.trailmind.ui.home.TrailBlue
+import com.example.trailmind.ui.home.TrailBlueFaint
 import com.example.trailmind.util.Resource
 
-private val TrailBlue = Color(0xFF1F5C8B)
-private val TrailBlueFaint = Color(0xFFEBF3FB)
 private val TextMuted = Color(0xFF6B7280)
 private val TextDark = Color(0xFF1A1A2E)
 private val CardBorder = Color(0xFFE5E9F0)
@@ -80,6 +82,7 @@ private val transports = listOf("Public Bus", "Private Jeep", "Flight")
 @Composable
 fun BudgetScreen(
     onBack: () -> Unit,
+    defaultNationality: String,
     viewModel: BudgetViewModel = viewModel()
 ) {
     var startingCity by remember { mutableStateOf(cities.first()) }
@@ -87,7 +90,7 @@ fun BudgetScreen(
     var durationDays by remember { mutableStateOf("7") }
     var groupSize by remember { mutableStateOf("2") }
     var month by remember { mutableStateOf(months.first()) }
-    var nationality by remember { mutableStateOf(nationalities.first()) }
+    var nationality by remember { mutableStateOf(defaultNationality) }
     var travelerType by remember { mutableStateOf(travelerTypes.last()) }
     var tier by remember { mutableStateOf(tiers[1]) }
     var transport by remember { mutableStateOf(transports.first()) }
@@ -315,62 +318,11 @@ fun BudgetScreen(
                         }
                     }
                 }
-                is Resource.Error -> {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFFFDECEA))
-                            .padding(14.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(Icons.Default.ErrorOutline, contentDescription = null, tint = Color(0xFFD32F2F), modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(8.dp))
-                        Text(s.message, color = Color(0xFFD32F2F), fontSize = 13.sp)
-                    }
-                }
+                is Resource.Error -> ErrorBox(s.message)
                 else -> {}
             }
 
             Spacer(Modifier.height(24.dp))
-        }
-    }
-}
-
-// ─────────────────────────────────────────────
-// COMPONENT: SECTION CARD
-// Groups related fields under a titled white card,
-// giving the form visual hierarchy instead of a
-// flat stack of identical boxes.
-// ─────────────────────────────────────────────
-@Composable
-private fun SectionCard(
-    title: String,
-    icon: ImageVector,
-    content: @Composable ColumnScope.() -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(Modifier.padding(18.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(30.dp)
-                        .clip(CircleShape)
-                        .background(TrailBlueFaint),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(icon, contentDescription = null, tint = TrailBlue, modifier = Modifier.size(16.dp))
-                }
-                Spacer(Modifier.width(10.dp))
-                Text(title, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = TextDark)
-            }
-            Spacer(Modifier.height(14.dp))
-            content()
         }
     }
 }
@@ -400,47 +352,6 @@ private fun InsightItem(
 }
 
 @Composable
-private fun ToggleRow(
-    icon: ImageVector,
-    title: String,
-    subtitle: String?,
-    checked: Boolean,
-    enabled: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                icon,
-                contentDescription = null,
-                tint = if (enabled) TrailBlue else Color(0xFFBBBBBB),
-                modifier = Modifier.size(18.dp)
-            )
-            Spacer(Modifier.width(10.dp))
-            Column {
-                Text(
-                    title, fontSize = 14.sp,
-                    color = if (enabled) TextDark else Color(0xFFAAAAAA)
-                )
-                if (subtitle != null) {
-                    Text(subtitle, fontSize = 11.sp, color = Color(0xFFAAAAAA))
-                }
-            }
-        }
-        Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
-            enabled = enabled,
-            colors = SwitchDefaults.colors(checkedTrackColor = TrailBlue)
-        )
-    }
-}
-
-@Composable
 private fun CostLine(icon: ImageVector, label: String, value: Double) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
@@ -451,50 +362,4 @@ private fun CostLine(icon: ImageVector, label: String, value: Double) {
         Text(label, fontSize = 13.sp, color = Color(0xFF444444), modifier = Modifier.weight(1f))
         Text("NPR ${"%,.0f".format(value)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = TextDark)
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun Dropdown(
-    label: String, selected: String, options: List<String>, icon: ImageVector? = null, onSelect: (String) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
-        OutlinedTextField(
-            value = selected, onValueChange = {}, readOnly = true,
-            label = { Text(label) },
-            leadingIcon = icon?.let { { Icon(it, contentDescription = null, tint = TrailBlue) } },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.menuAnchor().fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = TrailBlue,
-                focusedLabelColor = TrailBlue
-            )
-        )
-        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            options.forEach { opt ->
-                DropdownMenuItem(text = { Text(opt) }, onClick = { onSelect(opt); expanded = false })
-            }
-        }
-    }
-}
-
-@Composable
-private fun NumberField(
-    label: String, value: String, icon: ImageVector? = null, modifier: Modifier = Modifier, onValueChange: (String) -> Unit
-) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = { if (it.all { c -> c.isDigit() }) onValueChange(it) },
-        label = { Text(label) },
-        leadingIcon = icon?.let { { Icon(it, contentDescription = null, tint = TrailBlue) } },
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-        modifier = modifier, shape = RoundedCornerShape(12.dp),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = TrailBlue,
-            focusedLabelColor = TrailBlue
-        )
-    )
 }

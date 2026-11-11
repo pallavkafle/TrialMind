@@ -3,10 +3,20 @@ package com.example.trailmind.data.repository
 import com.example.trailmind.data.remote.ApiEnvelope
 import com.example.trailmind.util.Resource
 import com.example.trailmind.util.parseApiError
+import kotlinx.coroutines.CancellationException
 import retrofit2.Response
+import java.io.IOException
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
+
+// one place that turns a failed call into a message a traveller can read
+internal fun networkErrorMessage(e: Exception): String = when (e) {
+    is UnknownHostException, is ConnectException -> "Cannot reach the server. Is the backend running?"
+    is SocketTimeoutException -> "The request timed out."
+    is IOException -> "Network problem. Please check your connection and try again."
+    else -> "Something went wrong. Please try again."
+}
 
 suspend fun <T> safeApiCall(
     fallback: String,
@@ -17,19 +27,15 @@ suspend fun <T> safeApiCall(
         val data = res.body()?.data
         when {
             res.isSuccessful && data != null -> Resource.Success(data)
-            res.code() == 401 -> Resource.Error("Session expired. Please log out and log in again.")
+            res.code() == 401 -> Resource.Error("Your session expired. Please log in again.")
             else -> Resource.Error(
                 parseApiError(res.errorBody()?.string(), "$fallback (${res.code()})")
             )
         }
-    } catch (e: UnknownHostException) {
-        Resource.Error("Cannot reach the server. Is the backend running?")
-    } catch (e: ConnectException) {
-        Resource.Error("Cannot reach the server. Is the backend running?")
-    } catch (e: SocketTimeoutException) {
-        Resource.Error("The request timed out.")
+    } catch (e: CancellationException) {
+        throw e // a cancelled request is not an error to show
     } catch (e: Exception) {
-        Resource.Error(e.message ?: "Unexpected error")
+        Resource.Error(networkErrorMessage(e))
     }
 }
 
@@ -42,18 +48,14 @@ suspend fun safeActionCall(
         val res = call()
         when {
             res.isSuccessful && res.body()?.success == true -> Resource.Success(Unit)
-            res.code() == 401 -> Resource.Error("Session expired. Please log out and log in again.")
+            res.code() == 401 -> Resource.Error("Your session expired. Please log in again.")
             else -> Resource.Error(
                 parseApiError(res.errorBody()?.string(), "$fallback (${res.code()})")
             )
         }
-    } catch (e: UnknownHostException) {
-        Resource.Error("Cannot reach the server. Is the backend running?")
-    } catch (e: ConnectException) {
-        Resource.Error("Cannot reach the server. Is the backend running?")
-    } catch (e: SocketTimeoutException) {
-        Resource.Error("The request timed out.")
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Exception) {
-        Resource.Error(e.message ?: "Unexpected error")
+        Resource.Error(networkErrorMessage(e))
     }
 }

@@ -205,12 +205,29 @@ fun ItineraryScreen(
             }
 
             Spacer(Modifier.height(14.dp))
-            Text(
-                if (data.source == "gemini") "Itinerary text written by Gemini; distances and costs are calculated."
-                else "Template plan (AI unavailable); distances and costs are calculated.",
-                fontSize = 12.sp, color = TextMuted
-            )
-            data.warnings.forEach { Text(it, fontSize = 12.sp, color = Color(0xFFD32F2F)) }
+            if (data.source == "gemini") {
+                Text(
+                    "Itinerary text written by Gemini; distances and costs are calculated.",
+                    fontSize = 12.sp, color = TextMuted
+                )
+            } else {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFFFFF4E0))
+                        .padding(12.dp),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Icon(Icons.Default.WarningAmber, contentDescription = null, tint = Color(0xFFB26A00), modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        "The AI writer was unavailable, so this plan uses a standard template. " +
+                            "Distances, costs and the route are still calculated.",
+                        fontSize = 12.sp, color = Color(0xFF7A4A00)
+                    )
+                }
+            }
             Spacer(Modifier.height(12.dp))
         }
     }

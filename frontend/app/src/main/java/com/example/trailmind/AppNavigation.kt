@@ -36,6 +36,7 @@ import com.example.trailmind.ui.splash.SplashScreen
 import com.example.trailmind.ui.trips.MyTripsScreen
 import com.example.trailmind.ui.trips.SavedTripScreen
 import com.example.trailmind.util.Resource
+import com.example.trailmind.util.nationalityCategory
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -155,12 +156,18 @@ fun AppNavigator() {
         }
 
         composable(Routes.BUDGET) {
-            BudgetScreen(onBack = { navController.popBackStack() })
+            val nationality = remember { nationalityCategory(tokenStore.getUser()?.nationality) }
+            BudgetScreen(
+                onBack = { navController.popBackStack() },
+                defaultNationality = nationality
+            )
         }
 
         composable(Routes.TRIP_CHAT) {
+            val nationality = remember { nationalityCategory(tokenStore.getUser()?.nationality) }
             PlanTripScreen(
                 isChat = true,
+                defaultNationality = nationality,
                 onBack = { navController.popBackStack() },
                 onResult = { navController.navigate(Routes.ITINERARY) },
                 viewModel = planVm
@@ -168,8 +175,10 @@ fun AppNavigator() {
         }
 
         composable(Routes.TRIP_WIZARD) {
+            val nationality = remember { nationalityCategory(tokenStore.getUser()?.nationality) }
             PlanTripScreen(
                 isChat = false,
+                defaultNationality = nationality,
                 onBack = { navController.popBackStack() },
                 onResult = { navController.navigate(Routes.ITINERARY) },
                 viewModel = planVm
@@ -211,7 +220,11 @@ fun AppNavigator() {
         }
 
         composable(Routes.PERMITS) {
-            PermitsScreen(onBack = { navController.popBackStack() })
+            val nationality = remember { nationalityCategory(tokenStore.getUser()?.nationality) }
+            PermitsScreen(
+                onBack = { navController.popBackStack() },
+                defaultNationality = nationality
+            )
         }
 
         composable(Routes.EMERGENCY) {

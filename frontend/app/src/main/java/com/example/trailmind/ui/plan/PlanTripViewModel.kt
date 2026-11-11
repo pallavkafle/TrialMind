@@ -30,6 +30,10 @@ class PlanTripViewModel : ViewModel() {
     var lastRequest: ItineraryRequest? = null
         private set
 
+    // true from the moment the user taps Create until the finished plan has been opened,
+    // so the plan still opens if the user left the screen and came back, or rotated the phone
+    private var pendingOpen = false
+
     fun loadDestinations() {
         val current = _destinations.value
         if (current is Resource.Success || current is Resource.Loading) return
@@ -40,12 +44,27 @@ class PlanTripViewModel : ViewModel() {
     fun generate(request: ItineraryRequest) {
         if (_itinerary.value is Resource.Loading) return
         lastRequest = request
+        pendingOpen = true
         _itinerary.value = Resource.Loading
-        viewModelScope.launch { _itinerary.value = repo.itinerary(request) }
+        viewModelScope.launch {
+            val result = repo.itinerary(request)
+            if (result is Resource.Error) pendingOpen = false
+            _itinerary.value = result
+        }
+    }
+
+    // true once, when a plan the user asked for is ready
+    fun takeReadyResult(): Boolean {
+        if (pendingOpen && _itinerary.value is Resource.Success) {
+            pendingOpen = false
+            return true
+        }
+        return false
     }
 
     fun clearItinerary() {
-        if (_itinerary.value !is Resource.Loading) _itinerary.value = null
+        if (_itinerary.value is Resource.Loading || pendingOpen) return
+        _itinerary.value = null
     }
 
     fun saveTrip(request: ItineraryRequest, itinerary: ItineraryResponse) {
