@@ -5,7 +5,6 @@ import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -34,12 +33,16 @@ import com.example.trailmind.ui.plan.ItineraryScreen
 import com.example.trailmind.ui.plan.PlanTripScreen
 import com.example.trailmind.ui.plan.PlanTripViewModel
 import com.example.trailmind.ui.splash.SplashScreen
+import com.example.trailmind.ui.theme.StatusBarIcons
 import com.example.trailmind.ui.trips.MyTripsScreen
 import com.example.trailmind.ui.trips.SavedTripScreen
 import com.example.trailmind.util.Resource
 import com.example.trailmind.util.nationalityCategory
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
+
+// the splash stays at least this long, even when the login check finishes sooner
+private const val MIN_SPLASH_MS = 1500L
 
 object Routes {
     const val SPLASH = "splash"
@@ -76,7 +79,6 @@ fun AppNavigator() {
     val context = LocalContext.current
     val tokenStore = remember { TokenStore(context) }
     val authRepo = remember { AuthRepository(tokenStore) }
-    val scope = rememberCoroutineScope()
     val planVm: PlanTripViewModel = viewModel()
     val placesVm: PlacesViewModel = viewModel()
 
@@ -99,23 +101,24 @@ fun AppNavigator() {
     NavHost(navController = navController, startDestination = Routes.SPLASH) {
 
         composable(Routes.SPLASH) {
-            SplashScreen(
-                onSplashFinished = {
-                    scope.launch {
-                        val hadToken = tokenStore.getToken() != null
-                        val state = if (hadToken) {
-                            // wait at most 3 seconds; if the server cannot be reached the user still gets in
-                            withTimeoutOrNull(3000) { authRepo.validateSession() } ?: SessionState.UNKNOWN
-                        } else {
-                            SessionState.LOGGED_OUT
-                        }
-                        if (hadToken && state == SessionState.LOGGED_OUT) {
-                            Toast.makeText(context, "Your session expired. Please log in again.", Toast.LENGTH_LONG).show()
-                        }
-                        goClearingStack(if (state == SessionState.LOGGED_OUT) Routes.LOGIN else Routes.HOME)
-                    }
+            // the login check and the minimum splash time run together, not one after the other
+            LaunchedEffect(Unit) {
+                val started = System.currentTimeMillis()
+                val hadToken = tokenStore.getToken() != null
+                val state = if (hadToken) {
+                    // wait at most 3 seconds; if the server cannot be reached the user still gets in
+                    withTimeoutOrNull(3000) { authRepo.validateSession() } ?: SessionState.UNKNOWN
+                } else {
+                    SessionState.LOGGED_OUT
                 }
-            )
+                val remaining = MIN_SPLASH_MS - (System.currentTimeMillis() - started)
+                if (remaining > 0) delay(remaining)
+                if (hadToken && state == SessionState.LOGGED_OUT) {
+                    Toast.makeText(context, "Your session expired. Please log in again.", Toast.LENGTH_LONG).show()
+                }
+                goClearingStack(if (state == SessionState.LOGGED_OUT) Routes.LOGIN else Routes.HOME)
+            }
+            SplashScreen()
         }
 
         composable(Routes.LOGIN) {
@@ -133,6 +136,8 @@ fun AppNavigator() {
         }
 
         composable(Routes.HOME) {
+            // the Home header is white, so it needs dark status bar icons
+            StatusBarIcons(darkIcons = true)
             val user = remember { tokenStore.getUser() }
             HomeScreenWithDrawer(
                 userName = user?.name ?: "Traveller",

@@ -27,10 +27,10 @@ import androidx.compose.ui.unit.sp
 // ─────────────────────────────────────────────
 // Brand Colors — reused throughout the app
 // ─────────────────────────────────────────────
-val TrailBlue = Color(0xFF1F5C8B)
-val TrailBlueDark = Color(0xFF163D5C)
-val TrailBlueMid = Color(0xFF2A72A8)
-val TrailBlueFaint = Color(0xFFEBF3FB)
+val TrailBlue = com.example.trailmind.ui.theme.TrailBlue
+val TrailBlueDark = com.example.trailmind.ui.theme.TrailBlueDark
+val TrailBlueMid = com.example.trailmind.ui.theme.TrailBlueMid
+val TrailBlueFaint = com.example.trailmind.ui.theme.TrailBlueFaint
 
 // ─────────────────────────────────────────────
 // DATA MODELS

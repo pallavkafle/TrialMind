@@ -1,5 +1,6 @@
 package com.example.trailmind.ui.auth
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -8,8 +9,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,6 +29,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.trailmind.R
+import com.example.trailmind.ui.theme.TrailBlue
+import com.example.trailmind.ui.theme.TrailBlueDark
+import com.example.trailmind.ui.theme.TrailBlueMid
 import com.example.trailmind.util.Resource
 
 @Composable
@@ -83,7 +90,7 @@ fun RegisterScreen(
                     .clip(CircleShape)
                     .background(Color.White.copy(alpha = 0.2f))
             ) {
-                Icon(Icons.Default.ArrowBack, "Back", tint = Color.White)
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Color.White)
             }
 
             Column(
@@ -101,11 +108,10 @@ fun RegisterScreen(
                         .background(Color.White.copy(alpha = 0.2f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        painter = painterResource(id = android.R.drawable.ic_menu_compass),
-                        contentDescription = "TrailMind Logo",
-                        tint = Color.White,
-                        modifier = Modifier.size(50.dp)
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_splash_compass),
+                        contentDescription = "TrailMind logo",
+                        modifier = Modifier.size(90.dp)
                     )
                 }
 
@@ -183,8 +189,9 @@ fun RegisterScreen(
                                 trailingIcon = {
                                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                                         Icon(
-                                            painter = painterResource(id = if (passwordVisible) android.R.drawable.ic_menu_view else android.R.drawable.ic_secure),
-                                            contentDescription = "Toggle password", tint = Color(0xFF888888), modifier = Modifier.size(20.dp)
+                                            imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                            contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                                            tint = Color(0xFF888888), modifier = Modifier.size(20.dp)
                                         )
                                     }
                                 },
@@ -217,8 +224,9 @@ fun RegisterScreen(
                                     } else {
                                         IconButton(onClick = { confirmVisible = !confirmVisible }) {
                                             Icon(
-                                                painter = painterResource(id = if (confirmVisible) android.R.drawable.ic_menu_view else android.R.drawable.ic_secure),
-                                                contentDescription = "Toggle password", tint = Color(0xFF888888), modifier = Modifier.size(20.dp)
+                                                imageVector = if (confirmVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                                contentDescription = if (confirmVisible) "Hide password" else "Show password",
+                                                tint = Color(0xFF888888), modifier = Modifier.size(20.dp)
                                             )
                                         }
                                     }
@@ -237,7 +245,7 @@ fun RegisterScreen(
                         }
                         Spacer(Modifier.height(24.dp))
 
-                        // Create account button — NOW CALLS THE BACKEND
+                        // Create account button
                         Button(
                             onClick = {
                                 keyboard?.hide()

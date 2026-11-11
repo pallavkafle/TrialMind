@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- the app theme: light only. The grey window colour means screen changes never flash white -->
     <style name="Theme.TrailMind" parent="android:Theme.Material.Light.NoActionBar">
-        <!-- Theme settings for API 26+ -->
+        <item name="android:windowBackground">@color/screen_background</item>
+    </style>
+
+    <!-- shown by the system while the app starts; MainActivity's installSplashScreen() then switches to Theme.TrailMind -->
+    <style name="Theme.TrailMind.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/trail_blue</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_compass</item>
+        <item name="postSplashScreenTheme">@style/Theme.TrailMind</item>
     </style>
 </resources>

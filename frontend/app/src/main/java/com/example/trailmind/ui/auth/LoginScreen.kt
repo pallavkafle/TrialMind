@@ -1,5 +1,6 @@
 package com.example.trailmind.ui.auth
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -8,8 +9,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,12 +28,11 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.trailmind.R
+import com.example.trailmind.ui.theme.TrailBlue
+import com.example.trailmind.ui.theme.TrailBlueDark
+import com.example.trailmind.ui.theme.TrailBlueMid
 import com.example.trailmind.util.Resource
-
-// Brand colors
-val TrailBlue = Color(0xFF1F5C8B)
-val TrailBlueDark = Color(0xFF163D5C)
-val TrailBlueMid = Color(0xFF2A72A8)
 
 @Composable
 fun LoginScreen(
@@ -78,23 +79,6 @@ fun LoginScreen(
                     )
                 )
         ) {
-            // Back button
-            IconButton(
-                onClick = { /* handle back */ },
-                modifier = Modifier
-                    .padding(16.dp)
-                    .statusBarsPadding()
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.2f))
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color.White
-                )
-            }
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -111,11 +95,10 @@ fun LoginScreen(
                         .background(Color.White.copy(alpha = 0.2f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        painter = painterResource(id = android.R.drawable.ic_menu_compass),
-                        contentDescription = "TrailMind Logo",
-                        tint = Color.White,
-                        modifier = Modifier.size(50.dp)
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_splash_compass),
+                        contentDescription = "TrailMind logo",
+                        modifier = Modifier.size(90.dp)
                     )
                 }
 
@@ -231,12 +214,10 @@ fun LoginScreen(
                                 trailingIcon = {
                                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                                         Icon(
-                                            painter = painterResource(
-                                                id = if (passwordVisible)
-                                                    android.R.drawable.ic_menu_view
-                                                else
-                                                    android.R.drawable.ic_secure
-                                            ),
+                                            imageVector = if (passwordVisible)
+                                                Icons.Default.VisibilityOff
+                                            else
+                                                Icons.Default.Visibility,
                                             contentDescription = if (passwordVisible)
                                                 "Hide password"
                                             else
@@ -262,21 +243,7 @@ fun LoginScreen(
                             )
                         }
 
-                        // Forgot password
-                        Box(modifier = Modifier.fillMaxWidth()) {
-                            TextButton(
-                                onClick = { /* handle forgot password */ },
-                                modifier = Modifier.align(Alignment.CenterEnd)
-                            ) {
-                                Text(
-                                    text = "Forgot password?",
-                                    color = TrailBlue,
-                                    fontSize = 13.sp
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(24.dp))
 
                         // Sign in button
                         Button(
@@ -307,96 +274,6 @@ fun LoginScreen(
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     color = Color.White
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(20.dp))
-
-                        // Divider with text
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            HorizontalDivider(modifier = Modifier.weight(1f), color = Color(0xFFCCCCCC))
-                            Text(
-                                text = "  Or Login with  ",
-                                color = Color(0xFF888888),
-                                fontSize = 12.sp
-                            )
-                            HorizontalDivider(modifier = Modifier.weight(1f), color = Color(0xFFCCCCCC))
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Social login buttons
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            // Facebook
-                            OutlinedButton(
-                                onClick = { /* Facebook login */ },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(48.dp),
-                                shape = RoundedCornerShape(12.dp),
-                                border = androidx.compose.foundation.BorderStroke(
-                                    1.dp, Color(0xFFDDDDDD)
-                                ),
-                                colors = ButtonDefaults.outlinedButtonColors(
-                                    containerColor = Color.White
-                                )
-                            ) {
-                                Text(
-                                    text = "f",
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF1877F2)
-                                )
-                            }
-
-                            // Google
-                            OutlinedButton(
-                                onClick = { /* Google login */ },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(48.dp),
-                                shape = RoundedCornerShape(12.dp),
-                                border = androidx.compose.foundation.BorderStroke(
-                                    1.dp, Color(0xFFDDDDDD)
-                                ),
-                                colors = ButtonDefaults.outlinedButtonColors(
-                                    containerColor = Color.White
-                                )
-                            ) {
-                                Text(
-                                    text = "G",
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFFDB4437)
-                                )
-                            }
-
-                            // Apple
-                            OutlinedButton(
-                                onClick = { /* Apple login */ },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(48.dp),
-                                shape = RoundedCornerShape(12.dp),
-                                border = androidx.compose.foundation.BorderStroke(
-                                    1.dp, Color(0xFFDDDDDD)
-                                ),
-                                colors = ButtonDefaults.outlinedButtonColors(
-                                    containerColor = Color.White
-                                )
-                            ) {
-                                Text(
-                                    text = "",
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF000000)
                                 )
                             }
                         }

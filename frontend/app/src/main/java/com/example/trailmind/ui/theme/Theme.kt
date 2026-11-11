@@ -1,57 +1,49 @@
 package com.example.trailmind.ui.theme
 
-import android.app.Activity
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
-)
-
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+// The app is built with light screens, so it always uses this light brand scheme.
+// It ignores the phone's dark mode and wallpaper colours on purpose.
+private val BrandColors = lightColorScheme(
+    primary = TrailBlue,
     onPrimary = Color.White,
+    primaryContainer = TrailBlueFaint,
+    onPrimaryContainer = TrailBlueDark,
+    secondary = TrailBlueMid,
     onSecondary = Color.White,
+    secondaryContainer = TrailBlueFaint,
+    onSecondaryContainer = TrailBlueDark,
+    tertiary = TrailBlueDark,
     onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    background = ScreenBackground,
+    onBackground = TextDark,
+    surface = Color.White,
+    onSurface = TextDark,
+    surfaceVariant = Color(0xFFEEF1F5),
+    onSurfaceVariant = TextMuted,
+    surfaceTint = Color.Transparent,
+    inverseSurface = TextDark,
+    inverseOnSurface = Color.White,
+    outline = Color(0xFFB8C0CC),
+    outlineVariant = Color(0xFFE5E9F0),
+    error = ErrorRed,
+    onError = Color.White,
+    errorContainer = Color(0xFFFDECEA),
+    onErrorContainer = ErrorRed,
+    surfaceContainerLowest = Color.White,
+    surfaceContainerLow = Color.White,
+    surfaceContainer = Color.White,
+    surfaceContainerHigh = Color.White,
+    surfaceContainerHighest = Color(0xFFEEF1F5)
 )
 
 @Composable
-fun TrailMindTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
-    content: @Composable () -> Unit
-) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-
+fun TrailMindTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = BrandColors,
         typography = Typography,
         content = content
     )
