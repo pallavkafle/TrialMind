@@ -1,26 +1,42 @@
 """
 TrailMind - itinerary generation (report 4.1.3, Algorithm 2).
 
-Deterministic core (route order, day split, distances, budget) is computed in
-code. Gemini only writes day titles/activities inside a fixed day->location
-skeleton; if it fails or returns bad JSON, a deterministic template is used.
+Deterministic core (route order, day split, distances, budget) is computed in code.
+Gemini only writes day titles/activities inside a fixed day->location skeleton; if it
+fails, is too slow, or returns bad JSON, a deterministic template is used.
+
+Timeout chain: Gemini deadline (35 s) < ml-service total (~40 s) < Node proxy (90 s)
+< Android read timeout (130 s). Failures return one friendly warning plus a
+machine-readable fallback_reason; details go only to the server log.
+Successful Gemini plans are cached in memory for 30 minutes.
 """
+import hashlib
 import json
+import logging
 import os
 import re
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FuturesTimeout
 from typing import List, Optional
 
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 
 from routing.destinations import DESTINATIONS
 from routing.router import journey_distance, macro_distance, optimize_multi_stop
 
 load_dotenv()
+log = logging.getLogger("trailmind.itinerary")
 
 MAX_STOPS = 10
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
+LLM_TIMEOUT_S = 30                                        # passed to the client
+LLM_DEADLINE_S = float(os.getenv("LLM_DEADLINE_S", "35"))  # hard limit enforced by us
+CACHE_TTL_S = 30 * 60
+CACHE_MAX = 100
 
 # relative share of the trip days each archetype gets (min 1 day per stop)
 DAY_WEIGHT = {"Trekking": 3.0, "Wildlife": 2.0, "Hiking": 1.5,
@@ -51,6 +67,14 @@ ACTIVITIES = {
     "Wildlife": (["Check in and brief with the park guide", "Afternoon jungle walk or jeep safari", "Evening at leisure by the park"],
                  ["Early-morning safari or canoe ride", "Visit a local Tharu village or breeding centre"]),
 }
+
+FRIENDLY = {
+    "no_key": "AI text is not set up on the server, so a template plan was used.",
+    "timeout": "The AI took too long, so a template plan was used.",
+    "bad_format": "The AI reply could not be used, so a template plan was used.",
+    "llm_error": "The AI is unavailable right now, so a template plan was used.",
+}
+FRIENDLY_SUFFIX = " Distances and costs are unaffected."
 
 
 def _build_alias_map():
@@ -146,9 +170,11 @@ class ItineraryResponse(BaseModel):
     safety_notes: List[str]
     route: RouteInfo
     budget: BudgetInfo
-    source: str                      # "gemini" | "fallback"
+    source: str                                  # "gemini" | "fallback"
     model: Optional[str] = None
     warnings: List[str] = Field(default_factory=list)
+    fallback_reason: Optional[str] = None        # no_key | timeout | bad_format | llm_error | disabled
+    cached: bool = False
 
 
 class _LLMDay(BaseModel):
@@ -164,6 +190,33 @@ class _LLMPlan(BaseModel):
     summary: str = ""
     days: List[_LLMDay]
     safety_notes: List[str] = Field(default_factory=list)
+
+
+# ---------------- cache (successful Gemini plans only) ----------------
+_cache = {}
+_cache_lock = threading.Lock()
+
+
+def _cache_key(req: ItineraryRequest) -> str:
+    return hashlib.sha256(json.dumps(req.model_dump(), sort_keys=True).encode()).hexdigest()
+
+
+def _cache_get(key: str):
+    with _cache_lock:
+        hit = _cache.get(key)
+        if not hit:
+            return None
+        if time.time() - hit[0] > CACHE_TTL_S:
+            _cache.pop(key, None)
+            return None
+        return hit[1]
+
+
+def _cache_put(key: str, value: ItineraryResponse) -> None:
+    with _cache_lock:
+        if len(_cache) >= CACHE_MAX:
+            _cache.pop(min(_cache, key=lambda k: _cache[k][0]))
+        _cache[key] = (time.time(), value)
 
 
 # ---------------- LLM helpers ----------------
@@ -192,6 +245,7 @@ HUMAN = (
 )
 
 _llm = None
+_executor = ThreadPoolExecutor(max_workers=8, thread_name_prefix="gemini")
 
 
 def _get_llm():
@@ -204,8 +258,9 @@ def _get_llm():
     from langchain_google_genai import ChatGoogleGenerativeAI
     try:
         _llm = ChatGoogleGenerativeAI(model=GEMINI_MODEL, google_api_key=key,
-                                      max_retries=1, timeout=45)
-    except Exception:
+                                      max_retries=0, timeout=LLM_TIMEOUT_S)
+    except Exception as e:
+        log.warning("Gemini client options not accepted (%s); using defaults", type(e).__name__)
         _llm = ChatGoogleGenerativeAI(model=GEMINI_MODEL, google_api_key=key)
     return _llm
 
@@ -239,6 +294,36 @@ def _llm_plan(query, facts, skeleton, total_days) -> _LLMPlan:
     return plan
 
 
+def _llm_plan_with_deadline(query, facts, skeleton, total_days) -> _LLMPlan:
+    """Run the Gemini call in a worker thread and give up after LLM_DEADLINE_S."""
+    future = _executor.submit(_llm_plan, query, facts, skeleton, total_days)
+    try:
+        return future.result(timeout=LLM_DEADLINE_S)
+    except FuturesTimeout:
+        future.cancel()
+        raise
+
+
+def _fallback_reason(e: Exception) -> str:
+    name = type(e).__name__.lower()
+    if isinstance(e, RuntimeError) and "GEMINI_API_KEY" in str(e):
+        return "no_key"
+    if isinstance(e, FuturesTimeout) or "timeout" in name or "deadline" in name:
+        return "timeout"
+    if isinstance(e, (ValueError, ValidationError)):
+        return "bad_format"
+    return "llm_error"
+
+
+def _safe_msg(e: Exception) -> str:
+    """Exception text for the server log only, with the API key masked."""
+    msg = f"{type(e).__name__}: {e}"
+    key = os.getenv("GEMINI_API_KEY")
+    if key:
+        msg = msg.replace(key, "***")
+    return msg[:300]
+
+
 def _fmt_km(km: float) -> str:
     return f"{km:.0f}" if km >= 10 else f"{km:.1f}"
 
@@ -269,6 +354,12 @@ def build_itinerary_router(predict_fn, budget_cls, transport_fare_fn, dest_meta)
 
     @router.post("/itinerary", response_model=ItineraryResponse)
     def itinerary(req: ItineraryRequest):
+        key = _cache_key(req)
+        if req.use_llm:
+            hit = _cache_get(key)
+            if hit is not None:
+                return hit.model_copy(update={"cached": True})
+
         # 1. resolve stops
         stops = list(dict.fromkeys(req.stops)) or resolve_destinations(req.query)
         if not stops:
@@ -331,8 +422,10 @@ def build_itinerary_router(predict_fn, budget_cls, transport_fare_fn, dest_meta)
                          "arranged through a registered agency are required. Check current rules before booking.")
 
         # 6. itinerary text: Gemini inside a fixed skeleton, else fallback
-        skeleton = [(n, loc) for loc, d in zip(order, alloc) for n in [None] * d]
-        skeleton = [(i + 1, loc) for i, (_, loc) in enumerate(skeleton)]
+        skeleton = []
+        for loc, d in zip(order, alloc):
+            for _ in range(d):
+                skeleton.append((len(skeleton) + 1, loc))
         facts = {
             "ordered_stops": [{"name": s, "category": DESTINATIONS[s][2],
                                "altitude_m": DESTINATIONS[s][3], "days": d}
@@ -342,14 +435,15 @@ def build_itinerary_router(predict_fn, budget_cls, transport_fare_fn, dest_meta)
             "accommodation": req.accommodation_tier,
             "start": {"city": req.starting_city, "km": start_km},
         }
-        warnings, source = [], "fallback"
+        warnings, source, reason = [], "fallback", None
         title = f"{req.duration_days}-day trip: {' → '.join(order)}"
         summary = (f"{len(order)} stop(s) over {req.duration_days} days, about "
                    f"{comp['total_km']:.0f} km of travel and walking in total.")
         days = _fallback_days(order, alloc, leg_kms, req.starting_city, start_km)
+
         if req.use_llm:
             try:
-                plan = _llm_plan(req.query, facts, skeleton, req.duration_days)
+                plan = _llm_plan_with_deadline(req.query, facts, skeleton, req.duration_days)
                 fb = {d.day: d for d in days}
                 days = []
                 for i, d in enumerate(plan.days):
@@ -363,14 +457,23 @@ def build_itinerary_router(predict_fn, budget_cls, transport_fare_fn, dest_meta)
                 notes += [n for n in plan.safety_notes if n.strip()][:3]
                 source = "gemini"
             except Exception as e:
-                warnings.append(f"LLM unavailable, used fallback template: {type(e).__name__}: {str(e)[:200]}")
+                reason = _fallback_reason(e)
+                log.warning("Gemini plan failed (%s): %s", reason, _safe_msg(e))
+                warnings.append(FRIENDLY[reason] + FRIENDLY_SUFFIX)
+        else:
+            reason = "disabled"
 
-        return ItineraryResponse(
+        response = ItineraryResponse(
             title=title, summary=summary, days=days, days_per_stop=alloc,
             safety_notes=notes,
             route=RouteInfo(stops=order, leg_km=leg_kms, macro_km=comp["macro_km"],
                             micro_km=comp["micro_km"], total_km=comp["total_km"]),
             budget=budget, source=source,
-            model=GEMINI_MODEL if source == "gemini" else None, warnings=warnings)
+            model=GEMINI_MODEL if source == "gemini" else None,
+            warnings=warnings, fallback_reason=reason, cached=False)
+
+        if source == "gemini":
+            _cache_put(key, response)
+        return response
 
     return router
