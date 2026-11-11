@@ -2,22 +2,22 @@
 TrailMind — Graph-Based Route Optimization (report 4.2.1).
   1. A* point-to-point over a destination graph, Haversine heuristic
   2. Macro-transit distance = Haversine * gamma(archetype)
-  3. Micro-exploration distance over cached OSM walking graphs (eq. 4.3)
+  3. Micro-exploration distance over OSM walking graphs (eq. 4.3)
   4. Multi-stop TSP: nearest-neighbour init + 2-opt local search
 
-The micro layer loads per-node .graphml files from routing/osm_cache/
-(built once by build_osm_cache.py) and falls back to a deterministic
-1.20–1.50 km footprint when a graph is missing, empty, or disconnected.
+The micro layer is PRECOMPUTED once (python -m routing.build_micro_cache) from the per-node
+.graphml files in routing/osm_cache/ and stored in routing/micro_distances.json, which is
+committed to git. At runtime the server only reads that small file, so a request never parses
+a map and the server does not need osmnx or the cache. If a node is missing from the JSON, the
+slow path (graph or deterministic 1.20-1.50 km fallback) is used.
 """
 import heapq
+import json
 import math
 import random
 import re
 from itertools import combinations
 from pathlib import Path
-
-import networkx as nx
-import osmnx as ox
 
 from .destinations import DESTINATIONS, GAMMA
 
@@ -25,7 +25,9 @@ EARTH_R = 6371.0  # km
 
 # ---------- micro-layer config ----------
 _CACHE_DIR = Path(__file__).parent / "osm_cache"
-_GRAPH_MEMO = {}                       # slug -> loaded graph (parse each file once)
+MICRO_FILE = Path(__file__).parent / "micro_distances.json"
+_GRAPH_MEMO = {}                       # slug -> loaded graph (slow path only)
+_PRECOMPUTED = None                    # name -> km, loaded once from MICRO_FILE
 _FALLBACK_MIN, _FALLBACK_MAX = 1.20, 1.50   # km, report's deterministic band
 
 
@@ -66,12 +68,14 @@ def _fallback(name):
     return round(rng.uniform(_FALLBACK_MIN, _FALLBACK_MAX), 2)
 
 
-def micro_distance(node_name):
-    """Localized pedestrian exploration distance over the cached OSM
-    walking subgraph for this node. Falls back to the deterministic
-    1.20–1.50 km footprint if the graph is missing/empty/disconnected."""
-    slug = _slugify(node_name)
+def _micro_from_graph(node_name):
+    """SLOW path, used by routing.build_micro_cache and as a last resort.
+    Pedestrian exploration distance over the cached OSM walking subgraph for this node.
+    Returns (km, source) where source is 'osm' or 'fallback'."""
+    import networkx as nx          # imported here so the server never needs them
+    import osmnx as ox
 
+    slug = _slugify(node_name)
     if slug not in _GRAPH_MEMO:
         path = _CACHE_DIR / f"{slug}.graphml"
         if not path.exists():
@@ -84,7 +88,7 @@ def micro_distance(node_name):
 
     G = _GRAPH_MEMO[slug]
     if G is None or G.number_of_nodes() < 2:
-        return _fallback(node_name)
+        return _fallback(node_name), "fallback"
 
     try:
         lat, lon = DESTINATIONS[node_name][0], DESTINATIONS[node_name][1]
@@ -92,13 +96,34 @@ def micro_distance(node_name):
         # exit = farthest reachable node, modelling a real sightseeing loop
         lengths = nx.single_source_dijkstra_path_length(G, entry, weight="length")
         if len(lengths) < 2:
-            return _fallback(node_name)
+            return _fallback(node_name), "fallback"
         exit_node = max(lengths, key=lengths.get)
         metres = nx.shortest_path_length(G, entry, exit_node, weight="length")
         km = metres / 1000.0
-        return round(km, 2) if 0.05 <= km <= 15 else _fallback(node_name)
+        if 0.05 <= km <= 15:
+            return round(km, 2), "osm"
+        return _fallback(node_name), "fallback"
     except Exception:
-        return _fallback(node_name)
+        return _fallback(node_name), "fallback"
+
+
+def _load_precomputed():
+    global _PRECOMPUTED
+    if _PRECOMPUTED is None:
+        try:
+            data = json.loads(MICRO_FILE.read_text(encoding="utf-8"))
+            _PRECOMPUTED = {k: float(v["km"]) for k, v in data["values"].items()}
+        except Exception:
+            _PRECOMPUTED = {}
+    return _PRECOMPUTED
+
+
+def micro_distance(node_name):
+    """Localized pedestrian exploration distance for a destination (km)."""
+    pre = _load_precomputed()
+    if node_name in pre:
+        return pre[node_name]
+    return _micro_from_graph(node_name)[0]
 
 
 # ==========================================================

@@ -1,0 +1,114 @@
+{
+  "generated": "2026-11-11",
+  "method": "entry node to farthest reachable node on the cached OSM walking graph (eq. 4.3); deterministic 1.20-1.50 km fallback when the graph is missing, empty or disconnected",
+  "values": {
+    "Pashupatinath": {
+      "km": 4.8,
+      "source": "osm"
+    },
+    "Boudhanath": {
+      "km": 3.63,
+      "source": "osm"
+    },
+    "Swayambhunath": {
+      "km": 4.1,
+      "source": "osm"
+    },
+    "Bhaktapur Durbar Square": {
+      "km": 3.46,
+      "source": "osm"
+    },
+    "Lumbini": {
+      "km": 3.79,
+      "source": "osm"
+    },
+    "Janakpur (Janaki Mandir)": {
+      "km": 3.19,
+      "source": "osm"
+    },
+    "Everest Base Camp": {
+      "km": 3.45,
+      "source": "osm"
+    },
+    "Annapurna Circuit": {
+      "km": 3.91,
+      "source": "osm"
+    },
+    "Langtang Valley": {
+      "km": 2.14,
+      "source": "osm"
+    },
+    "Mardi Himal": {
+      "km": 2.99,
+      "source": "osm"
+    },
+    "Manaslu Circuit": {
+      "km": 1.22,
+      "source": "fallback"
+    },
+    "Gokyo Lakes": {
+      "km": 1.96,
+      "source": "osm"
+    },
+    "Upper Mustang": {
+      "km": 4.25,
+      "source": "osm"
+    },
+    "Muktinath": {
+      "km": 3.41,
+      "source": "osm"
+    },
+    "Poon Hill (Ghorepani)": {
+      "km": 5.6,
+      "source": "osm"
+    },
+    "Nagarkot": {
+      "km": 5.23,
+      "source": "osm"
+    },
+    "Shivapuri National Park": {
+      "km": 5.72,
+      "source": "osm"
+    },
+    "Bandipur Trails": {
+      "km": 5.01,
+      "source": "osm"
+    },
+    "Dhampus / Australian Camp": {
+      "km": 6.23,
+      "source": "osm"
+    },
+    "Champadevi / Chandragiri Trail": {
+      "km": 7.15,
+      "source": "osm"
+    },
+    "Sirubari": {
+      "km": 6.32,
+      "source": "osm"
+    },
+    "Ghalegaun": {
+      "km": 0.58,
+      "source": "osm"
+    },
+    "Bhujung Village": {
+      "km": 2.73,
+      "source": "osm"
+    },
+    "Amaltari Community Homestay": {
+      "km": 2.23,
+      "source": "osm"
+    },
+    "Chitwan National Park": {
+      "km": 4.84,
+      "source": "osm"
+    },
+    "Bardia National Park": {
+      "km": 1.63,
+      "source": "osm"
+    },
+    "Sagarmatha National Park": {
+      "km": 4.66,
+      "source": "osm"
+    }
+  }
+}
