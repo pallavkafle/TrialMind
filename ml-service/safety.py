@@ -1,36 +1,54 @@
 """
 TrailMind - review sentiment + safety escalation
 (report 2.5; class diagram Review.analyzeSentiment).
-DistilBERT (SST-2) gives POSITIVE/NEGATIVE; keyword rules escalate hazard
-mentions. The model loads lazily on first use so the server starts fast.
+DistilBERT (SST-2) gives POSITIVE/NEGATIVE; keyword rules escalate hazard mentions.
+
+Hazards come in two kinds:
+  hard - avalanche, landslide, injury ...: any mention that is not negated is a WARNING.
+  soft - rescue, emergency, evacuation: ambiguous ("Rescue Association post", "emergency exit"),
+         so WARNING only when the review is NEGATIVE, otherwise CAUTION.
+Negation is scoped to the same clause: a negator ("no", "not", "never", "without", "n't" ...)
+within the 4 words before the keyword, with no punctuation or conjunction in between.
+For safety a missed hazard is worse than a false alarm, so the rules err on the side of flagging.
+The model loads lazily, or in the background via warm_up(), so the server starts fast.
 """
+import logging
 import re
 import threading
-from typing import List
+from typing import List, Tuple
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+log = logging.getLogger("trailmind.safety")
+
 MODEL_NAME = "distilbert-base-uncased-finetuned-sst-2-english"
 
-HAZARD_PATTERNS = {
+HARD_PATTERNS = {
     "avalanche": r"\bavalanche",
     "landslide": r"\blandslide",
     "rockfall": r"\brock ?fall",
     "flood": r"\bflood",
-    "altitude sickness": r"\baltitude sickness|\bacute mountain sickness",
+    "altitude sickness": r"\b(?:altitude|mountain) sickness",
     "hypothermia": r"\bhypothermi",
     "frostbite": r"\bfrostbite",
     "injury": r"\binjur(?:y|ies|ed)",
-    "accident": r"\baccident",
-    "rescue": r"\brescue",
-    "evacuation": r"\bevacuat",
+    "accident": r"\baccidents?\b",
     "stranded": r"\bstranded",
     "collapse": r"\bcollaps",
     "dangerous": r"\bdangerous|\bunsafe",
-    "emergency": r"\bemergenc",
+    "blizzard": r"\bblizzard|\bsnowstorm",
+    "earthquake": r"\bearthquake",
 }
-NEGATORS = re.compile(r"\b(?:no|not|never|without|zero|nothing|free of|isn't|wasn't|didn't)\b")
+SOFT_PATTERNS = {
+    "rescue": r"\brescue",
+    "emergency": r"\bemergenc",
+    "evacuation": r"\bevacuat",
+}
+
+CLAUSE_SPLIT = re.compile(r"[.!?;,:\n]|\b(?:but|and|however|although|though|while|yet|except|whereas)\b")
+NEGATORS = {"no", "not", "never", "without", "zero", "nothing", "none", "neither", "nor", "cannot"}
+NEGATION_WINDOW = 4
 
 _pipe = None
 _lock = threading.Lock()
@@ -46,22 +64,45 @@ def _get_pipe():
     return _pipe
 
 
-def find_hazards(text: str) -> List[str]:
-    low = text.lower()
+def warm_up():
+    """Load the sentiment model in a background thread so the first review is fast."""
+    def _load():
+        try:
+            _get_pipe()
+            log.info("sentiment model ready")
+        except Exception as e:                      # never break server startup
+            log.warning("sentiment warm-up skipped: %s", type(e).__name__)
+
+    threading.Thread(target=_load, daemon=True, name="sentiment-warmup").start()
+
+
+def _negated(low: str, start: int) -> bool:
+    clause = CLAUSE_SPLIT.split(low[:start])[-1]
+    tokens = re.findall(r"[a-z']+", clause)[-NEGATION_WINDOW:]
+    return any(t in NEGATORS or t.endswith("n't") for t in tokens)
+
+
+def _scan(low: str, patterns: dict) -> List[str]:
     hits = []
-    for label, pattern in HAZARD_PATTERNS.items():
+    for label, pattern in patterns.items():
         for m in re.finditer(pattern, low):
-            window = low[max(0, m.start() - 30):m.start()]
-            if NEGATORS.search(window):
-                continue            # "no landslides", "not dangerous"
-            hits.append(label)
-            break
+            if not _negated(low, m.start()):
+                hits.append(label)
+                break
     return hits
 
 
-def classify_safety(label: str, confidence: float, hazards: List[str]) -> str:
-    if hazards:
+def find_hazards(text: str) -> Tuple[List[str], List[str]]:
+    """Returns (hard hazards, soft hazards) mentioned and not negated."""
+    low = text.lower().replace("\u2019", "'")
+    return _scan(low, HARD_PATTERNS), _scan(low, SOFT_PATTERNS)
+
+
+def classify_safety(label: str, confidence: float, hard: List[str], soft: List[str]) -> str:
+    if hard:
         return "WARNING"
+    if soft:
+        return "WARNING" if label == "NEGATIVE" else "CAUTION"
     if label == "NEGATIVE" and confidence >= 0.85:
         return "CAUTION"
     return "OK"
@@ -106,17 +147,18 @@ def _run_model(texts: List[str]):
     try:
         return _get_pipe()(texts, truncation=True, max_length=512, batch_size=16)
     except Exception as e:
-        raise HTTPException(503, f"Sentiment model unavailable: {type(e).__name__}: {str(e)[:200]}")
+        log.warning("sentiment model unavailable: %s: %s", type(e).__name__, str(e)[:200])
+        raise HTTPException(503, "Sentiment model unavailable")
 
 
 def _to_out(text: str, raw: dict) -> ReviewOut:
     label = str(raw["label"]).upper()
     conf = round(float(raw["score"]), 4)
     p_pos = conf if label == "POSITIVE" else round(1 - conf, 4)
-    hazards = find_hazards(text)
+    hard, soft = find_hazards(text)
     return ReviewOut(label=label, confidence=conf, positive_probability=p_pos,
-                     safety_flag=classify_safety(label, conf, hazards),
-                     matched_keywords=hazards)
+                     safety_flag=classify_safety(label, conf, hard, soft),
+                     matched_keywords=hard + soft)
 
 
 def build_safety_router() -> APIRouter:

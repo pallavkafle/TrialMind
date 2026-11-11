@@ -134,6 +134,8 @@ def load():
         model = joblib.load(MODEL_PATH)
     if MEAL_MODEL_PATH.exists():
         meal_model = joblib.load(MEAL_MODEL_PATH)
+    from safety import warm_up  # load the sentiment model in the background
+    warm_up()
 
 
 class BudgetRequest(BaseModel):
