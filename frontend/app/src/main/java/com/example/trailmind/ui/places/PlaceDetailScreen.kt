@@ -44,6 +44,7 @@ fun PlaceDetailScreen(
     name: String,
     onBack: () -> Unit,
     onWriteReview: () -> Unit,
+    onFindHotels: () -> Unit,
     placesVm: PlacesViewModel,
     viewModel: PlaceDetailViewModel = viewModel(),
     weatherVm: WeatherViewModel = viewModel()
@@ -123,6 +124,18 @@ fun PlaceDetailScreen(
                 .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
             HeaderCard(name, dest)
+            Spacer(Modifier.height(12.dp))
+
+            OutlinedButton(
+                onClick = onFindHotels,
+                modifier = Modifier.fillMaxWidth().height(48.dp),
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = TrailBlue)
+            ) {
+                Icon(Icons.Default.Hotel, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("Places to stay nearby", fontWeight = FontWeight.SemiBold)
+            }
             Spacer(Modifier.height(14.dp))
 
             if (dest != null) {

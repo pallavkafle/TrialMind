@@ -24,6 +24,7 @@ import com.example.trailmind.ui.components.ComingSoonScreen
 import com.example.trailmind.ui.currency.CurrencyScreen
 import com.example.trailmind.ui.emergency.EmergencyScreen
 import com.example.trailmind.ui.home.HomeScreenWithDrawer
+import com.example.trailmind.ui.hotels.HotelsScreen
 import com.example.trailmind.ui.permits.PermitsScreen
 import com.example.trailmind.ui.places.PlaceDetailScreen
 import com.example.trailmind.ui.places.PlacesScreen
@@ -54,6 +55,7 @@ object Routes {
     const val PERMITS = "permits"
     const val EMERGENCY = "emergency"
     const val CURRENCY = "currency"
+    const val HOTELS = "hotels?destination={destination}"
     const val PLACES = "places/{category}"
     const val PLACE = "place/{name}"
     const val WRITE_REVIEW = "review/{name}"
@@ -63,6 +65,8 @@ object Routes {
     // destination names contain spaces, slashes and brackets, so they must be encoded in the route
     fun place(name: String) = "place/${Uri.encode(name)}"
     fun writeReview(name: String) = "review/${Uri.encode(name)}"
+    fun hotels(destination: String? = null) =
+        if (destination.isNullOrBlank()) "hotels" else "hotels?destination=${Uri.encode(destination)}"
     fun comingSoon(name: String) = "soon/$name"
 }
 
@@ -146,6 +150,7 @@ fun AppNavigator() {
                         "permits" -> navController.navigate(Routes.PERMITS)
                         "emergency" -> navController.navigate(Routes.EMERGENCY)
                         "currency" -> navController.navigate(Routes.CURRENCY)
+                        "hotels" -> navController.navigate(Routes.hotels())
                         "places" -> navController.navigate(Routes.places("All"))
                         "trekking" -> navController.navigate(Routes.places("Trekking"))
                         else -> navController.navigate(Routes.comingSoon(route))
@@ -236,6 +241,24 @@ fun AppNavigator() {
         }
 
         composable(
+            Routes.HOTELS,
+            arguments = listOf(
+                navArgument("destination") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { entry ->
+            val destination = entry.arguments?.getString("destination")?.let { Uri.decode(it) }
+            HotelsScreen(
+                initialDestination = destination,
+                onBack = { navController.popBackStack() },
+                placesVm = placesVm
+            )
+        }
+
+        composable(
             Routes.PLACES,
             arguments = listOf(navArgument("category") { type = NavType.StringType })
         ) { entry ->
@@ -256,6 +279,7 @@ fun AppNavigator() {
                 name = name,
                 onBack = { navController.popBackStack() },
                 onWriteReview = { navController.navigate(Routes.writeReview(name)) },
+                onFindHotels = { navController.navigate(Routes.hotels(name)) },
                 placesVm = placesVm
             )
         }

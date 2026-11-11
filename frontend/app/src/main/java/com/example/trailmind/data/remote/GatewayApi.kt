@@ -7,6 +7,7 @@ import com.example.trailmind.data.remote.dto.CurrencyRatesDto
 import com.example.trailmind.data.remote.dto.DestinationDto
 import com.example.trailmind.data.remote.dto.ItineraryRequest
 import com.example.trailmind.data.remote.dto.ItineraryResponse
+import com.example.trailmind.data.remote.dto.NearbyHotelsResponse
 import com.example.trailmind.data.remote.dto.NearestFacilitiesResponse
 import com.example.trailmind.data.remote.dto.PermitCheckRequest
 import com.example.trailmind.data.remote.dto.PermitCheckResponse
@@ -88,4 +89,15 @@ interface GatewayApi {
 
     @GET("api/currency/rates")
     suspend fun currencyRates(): Response<ApiEnvelope<CurrencyRatesDto>>
+
+    // login required; give destination OR lat + lon
+    @GET("api/hotels/nearby")
+    suspend fun nearbyHotels(
+        @Query("destination") destination: String?,
+        @Query("lat") lat: Double?,
+        @Query("lon") lon: Double?,
+        @Query("type") type: String?,
+        @Query("limit") limit: Int?,
+        @Query("radius_km") radiusKm: Int?
+    ): Response<ApiEnvelope<NearbyHotelsResponse>>
 }
