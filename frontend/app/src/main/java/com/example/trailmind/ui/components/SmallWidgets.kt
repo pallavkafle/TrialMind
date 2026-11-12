@@ -62,11 +62,16 @@ fun InfoTag(text: String, color: Color, modifier: Modifier = Modifier) {
     Text(
         text,
         fontSize = 11.sp,
-        color = color,
+        color = tagText(color),
         fontWeight = FontWeight.Medium,
         modifier = modifier
             .clip(RoundedCornerShape(50))
-            .background(color.copy(alpha = 0.12f))
+            .background(tagText(color).copy(alpha = 0.16f))
             .padding(horizontal = 10.dp, vertical = 4.dp)
     )
 }
+
+// on a dark screen the tag text is lightened so it stays readable
+@Composable
+private fun tagText(color: Color): Color =
+    if (com.example.trailmind.ui.theme.isAppDark()) androidx.compose.ui.graphics.lerp(color, Color.White, 0.5f) else color

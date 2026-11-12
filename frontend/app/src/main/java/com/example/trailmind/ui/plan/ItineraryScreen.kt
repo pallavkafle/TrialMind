@@ -26,8 +26,8 @@ import com.example.trailmind.ui.home.TrailBlue
 import com.example.trailmind.ui.home.TrailBlueFaint
 import com.example.trailmind.util.Resource
 
-private val TextMuted = Color(0xFF6B7280)
-private val TextDark = Color(0xFF1A1A2E)
+private val TextMuted: Color @Composable get() = com.example.trailmind.ui.theme.Pal.textMuted
+private val TextDark: Color @Composable get() = com.example.trailmind.ui.theme.Pal.textDark
 
 private fun npr(v: Double) = "NPR ${"%,.0f".format(v)}"
 
@@ -56,7 +56,7 @@ fun ItineraryScreen(
     val saved = saveState is Resource.Success
 
     Scaffold(
-        containerColor = Color(0xFFF5F7FA),
+        containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
@@ -72,7 +72,7 @@ fun ItineraryScreen(
             )
         },
         bottomBar = {
-            if (!readOnly) Surface(shadowElevation = 8.dp, color = Color.White) {
+            if (!readOnly) Surface(shadowElevation = 8.dp, color = MaterialTheme.colorScheme.surface) {
                 Button(
                     onClick = { viewModel.saveTrip(request, data) },
                     enabled = !saving && !saved,
@@ -116,7 +116,7 @@ fun ItineraryScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(18.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
             ) {
                 Column(Modifier.padding(20.dp)) {
@@ -175,7 +175,7 @@ fun ItineraryScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Column(Modifier.padding(16.dp)) {
@@ -184,7 +184,7 @@ fun ItineraryScreen(
                         Text(day.title, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = TextDark)
                         Spacer(Modifier.height(8.dp))
                         day.activities.forEach {
-                            Text("•  $it", fontSize = 13.sp, color = Color(0xFF444444), modifier = Modifier.padding(vertical = 2.dp))
+                            Text("•  $it", fontSize = 13.sp, color = com.example.trailmind.ui.theme.Pal.textBody, modifier = Modifier.padding(vertical = 2.dp))
                         }
                         if (!day.tips.isNullOrBlank()) {
                             Spacer(Modifier.height(8.dp))
@@ -199,7 +199,7 @@ fun ItineraryScreen(
                 Spacer(Modifier.height(4.dp))
                 SectionCard(title = "Safety notes", icon = Icons.Default.WarningAmber) {
                     data.safety_notes.forEach {
-                        Text("•  $it", fontSize = 13.sp, color = Color(0xFF444444), modifier = Modifier.padding(vertical = 3.dp))
+                        Text("•  $it", fontSize = 13.sp, color = com.example.trailmind.ui.theme.Pal.textBody, modifier = Modifier.padding(vertical = 3.dp))
                     }
                 }
             }
@@ -215,16 +215,16 @@ fun ItineraryScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFFFFF4E0))
+                        .background(com.example.trailmind.ui.theme.Pal.amberBg)
                         .padding(12.dp),
                     verticalAlignment = Alignment.Top
                 ) {
-                    Icon(Icons.Default.WarningAmber, contentDescription = null, tint = Color(0xFFB26A00), modifier = Modifier.size(18.dp))
+                    Icon(Icons.Default.WarningAmber, contentDescription = null, tint = com.example.trailmind.ui.theme.Pal.amber, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
                     Text(
                         "The AI writer was unavailable, so this plan uses a standard template. " +
                             "Distances, costs and the route are still calculated.",
-                        fontSize = 12.sp, color = Color(0xFF7A4A00)
+                        fontSize = 12.sp, color = com.example.trailmind.ui.theme.Pal.amberText
                     )
                 }
             }
@@ -253,7 +253,7 @@ private fun CostRow(icon: ImageVector, label: String, value: Double) {
     ) {
         Icon(icon, contentDescription = null, tint = TrailBlue, modifier = Modifier.size(15.dp))
         Spacer(Modifier.width(8.dp))
-        Text(label, fontSize = 13.sp, color = Color(0xFF444444), modifier = Modifier.weight(1f))
+        Text(label, fontSize = 13.sp, color = com.example.trailmind.ui.theme.Pal.textBody, modifier = Modifier.weight(1f))
         Text(npr(value), fontSize = 13.sp, fontWeight = FontWeight.Medium, color = TextDark)
     }
 }

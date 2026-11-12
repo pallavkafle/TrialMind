@@ -23,7 +23,7 @@ import com.example.trailmind.ui.components.*
 import com.example.trailmind.ui.home.TrailBlue
 import com.example.trailmind.util.Resource
 
-private val TextMuted = Color(0xFF6B7280)
+private val TextMuted: Color @Composable get() = com.example.trailmind.ui.theme.Pal.textMuted
 
 private val cities = listOf("Kathmandu", "Chitwan", "Pokhara", "Lumbini", "Itahari", "Surkhet", "Nepalgunj")
 private val months = listOf(
@@ -81,7 +81,7 @@ fun PlanTripScreen(
     }
 
     Scaffold(
-        containerColor = Color(0xFFF5F7FA),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = {

@@ -35,8 +35,8 @@ import com.example.trailmind.ui.home.TrailBlueFaint
 import com.example.trailmind.util.Resource
 import com.example.trailmind.util.formatRfcDate
 
-private val TextMuted = Color(0xFF6B7280)
-private val TextDark = Color(0xFF1A1A2E)
+private val TextMuted: Color @Composable get() = com.example.trailmind.ui.theme.Pal.textMuted
+private val TextDark: Color @Composable get() = com.example.trailmind.ui.theme.Pal.textDark
 
 // small rates (like yen) need more decimals to be readable
 private fun rateText(v: Double): String = if (v < 10) "%.4f".format(v) else "%,.2f".format(v)
@@ -55,7 +55,7 @@ fun CurrencyScreen(
     LaunchedEffect(Unit) { viewModel.load() }
 
     Scaffold(
-        containerColor = Color(0xFFF5F7FA),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { Text("Currency", fontWeight = FontWeight.SemiBold) },
@@ -209,7 +209,7 @@ private fun RatesContent(
                     fontSize = 14.sp, fontWeight = FontWeight.Bold, color = TrailBlue
                 )
             }
-            if (i < rates.lastIndex) HorizontalDivider(color = Color(0xFFEEEEEE))
+            if (i < rates.lastIndex) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         }
     }
 
@@ -227,7 +227,7 @@ private fun RatesContent(
     if (d.stale == true) {
         Text(
             "Showing saved rates; the rate service could not be reached just now.",
-            fontSize = 12.sp, color = Color(0xFFB26A00), modifier = Modifier.padding(top = 4.dp)
+            fontSize = 12.sp, color = com.example.trailmind.ui.theme.Pal.amber, modifier = Modifier.padding(top = 4.dp)
         )
     }
     val url = d.attribution_url

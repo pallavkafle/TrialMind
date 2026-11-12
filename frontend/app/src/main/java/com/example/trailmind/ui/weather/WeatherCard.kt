@@ -23,10 +23,10 @@ import com.example.trailmind.ui.components.SectionCard
 import com.example.trailmind.util.Resource
 import com.example.trailmind.util.formatDayLabel
 
-private val TextMuted = Color(0xFF6B7280)
-private val TextDark = Color(0xFF1A1A2E)
-private val RainBlue = Color(0xFF1565C0)
-private val Amber = Color(0xFFB26A00)
+private val TextMuted: Color @Composable get() = com.example.trailmind.ui.theme.Pal.textMuted
+private val TextDark: Color @Composable get() = com.example.trailmind.ui.theme.Pal.textDark
+private val RainBlue: Color @Composable get() = com.example.trailmind.ui.theme.Pal.rain
+private val Amber: Color @Composable get() = com.example.trailmind.ui.theme.Pal.amber
 
 private fun degrees(v: Double?): String = v?.let { "%.0f°".format(it) } ?: "-"
 private fun tempC(v: Double?): String = v?.let { "%.0f°C".format(it) } ?: "-"
@@ -89,7 +89,7 @@ private fun WeatherContent(w: WeatherDto, highestM: Int?) {
     }
 
     Spacer(Modifier.height(8.dp))
-    HorizontalDivider(color = Color(0xFFEEEEEE))
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     w.daily.orEmpty().forEach { DayRow(it) }
 
     val advisories = w.advisories.orEmpty()
@@ -99,7 +99,7 @@ private fun WeatherContent(w: WeatherDto, highestM: Int?) {
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
-                .background(Color(0xFFFFF4E0))
+                .background(com.example.trailmind.ui.theme.Pal.amberBg)
                 .padding(12.dp),
             verticalAlignment = Alignment.Top
         ) {
@@ -107,7 +107,7 @@ private fun WeatherContent(w: WeatherDto, highestM: Int?) {
             Spacer(Modifier.width(8.dp))
             Column {
                 advisories.forEach {
-                    Text("•  $it", fontSize = 12.sp, color = Color(0xFF7A4A00), modifier = Modifier.padding(vertical = 2.dp))
+                    Text("•  $it", fontSize = 12.sp, color = com.example.trailmind.ui.theme.Pal.amberText, modifier = Modifier.padding(vertical = 2.dp))
                 }
             }
         }
@@ -155,5 +155,5 @@ private fun DayRow(d: WeatherDayDto) {
             }
         }
     }
-    HorizontalDivider(color = Color(0xFFF0F0F0))
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 }

@@ -36,7 +36,7 @@ fun DestinationChips(
             categoryOrder.forEach { cat ->
                 val items = byCategory[cat].orEmpty()
                 if (items.isNotEmpty()) {
-                    Text(cat, fontSize = 12.sp, color = Color(0xFF6B7280), fontWeight = FontWeight.SemiBold)
+                    Text(cat, fontSize = 12.sp, color = com.example.trailmind.ui.theme.Pal.textMuted, fontWeight = FontWeight.SemiBold)
                     Spacer(Modifier.height(6.dp))
                     FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -61,7 +61,7 @@ fun DestinationChips(
                     Spacer(Modifier.height(12.dp))
                 }
             }
-            Text("Selected ${selected.size}/$maxSelected", fontSize = 12.sp, color = Color(0xFF6B7280))
+            Text("Selected ${selected.size}/$maxSelected", fontSize = 12.sp, color = com.example.trailmind.ui.theme.Pal.textMuted)
         }
     }
 }

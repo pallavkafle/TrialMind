@@ -28,8 +28,8 @@ import com.example.trailmind.ui.home.TrailBlue
 import com.example.trailmind.ui.home.TrailBlueFaint
 import com.example.trailmind.util.Resource
 
-private val TextMuted = Color(0xFF6B7280)
-private val TextDark = Color(0xFF1A1A2E)
+private val TextMuted: Color @Composable get() = com.example.trailmind.ui.theme.Pal.textMuted
+private val TextDark: Color @Composable get() = com.example.trailmind.ui.theme.Pal.textDark
 
 private val categories = listOf("All", "Cultural", "Trekking", "Hiking", "Homestay", "Wildlife")
 
@@ -61,7 +61,7 @@ fun PlacesScreen(
     val title = if (initialCategory != "All" && initialCategory in categories) initialCategory else "Places"
 
     Scaffold(
-        containerColor = Color(0xFFF5F7FA),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { Text(title, fontWeight = FontWeight.SemiBold) },
@@ -90,8 +90,8 @@ fun PlacesScreen(
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = TrailBlue,
                         focusedLabelColor = TrailBlue,
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface
                     )
                 )
                 Spacer(Modifier.height(10.dp))
@@ -159,7 +159,7 @@ private fun PlaceCard(d: DestinationDto, onClick: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth().clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -180,8 +180,8 @@ private fun PlaceCard(d: DestinationDto, onClick: () -> Unit) {
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        if (d.is_restricted) InfoTag("Restricted area", Color(0xFFC62828))
-                        if (d.has_porter) InfoTag("Porter available", Color(0xFF2E7D32))
+                        if (d.is_restricted) InfoTag("Restricted area", com.example.trailmind.ui.theme.Pal.red)
+                        if (d.has_porter) InfoTag("Porter available", com.example.trailmind.ui.theme.Pal.green)
                     }
                 }
             }

@@ -32,11 +32,11 @@ import com.example.trailmind.ui.weather.WeatherViewModel
 import com.example.trailmind.util.Resource
 import com.example.trailmind.util.formatIsoDate
 
-private val TextMuted = Color(0xFF6B7280)
-private val TextDark = Color(0xFF1A1A2E)
-private val Red = Color(0xFFC62828)
-private val Green = Color(0xFF2E7D32)
-private val Amber = Color(0xFFB26A00)
+private val TextMuted: Color @Composable get() = com.example.trailmind.ui.theme.Pal.textMuted
+private val TextDark: Color @Composable get() = com.example.trailmind.ui.theme.Pal.textDark
+private val Red: Color @Composable get() = com.example.trailmind.ui.theme.Pal.red
+private val Green: Color @Composable get() = com.example.trailmind.ui.theme.Pal.green
+private val Amber: Color @Composable get() = com.example.trailmind.ui.theme.Pal.amber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,7 +80,7 @@ fun PlaceDetailScreen(
     }
 
     Scaffold(
-        containerColor = Color(0xFFF5F7FA),
+        containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
@@ -98,7 +98,7 @@ fun PlaceDetailScreen(
             )
         },
         bottomBar = {
-            Surface(shadowElevation = 8.dp, color = Color.White) {
+            Surface(shadowElevation = 8.dp, color = MaterialTheme.colorScheme.surface) {
                 Button(
                     onClick = onWriteReview,
                     modifier = Modifier
@@ -187,7 +187,7 @@ fun PlaceDetailScreen(
                 TextButton(onClick = {
                     viewModel.delete(review.id, name)
                     toDelete = null
-                }) { Text("Delete", color = Color(0xFFD32F2F)) }
+                }) { Text("Delete", color = com.example.trailmind.ui.theme.Pal.red) }
             },
             dismissButton = { TextButton(onClick = { toDelete = null }) { Text("Cancel") } }
         )
@@ -200,7 +200,7 @@ private fun HeaderCard(name: String, d: DestinationDto?) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(Modifier.padding(20.dp)) {
@@ -258,7 +258,7 @@ private fun SummaryContent(sm: ReviewSummaryDto?) {
         NoticeBox(
             text = (if (sm.warningCount == 1) "1 review mentions" else "${sm.warningCount} reviews mention") +
                 " safety hazards such as landslides or floods. Read them before you go.",
-            background = Color(0xFFFDECEA),
+            background = com.example.trailmind.ui.theme.Pal.errorBg,
             tint = Red
         )
     } else if (sm.cautionCount > 0) {
@@ -266,7 +266,7 @@ private fun SummaryContent(sm: ReviewSummaryDto?) {
         NoticeBox(
             text = (if (sm.cautionCount == 1) "1 review is" else "${sm.cautionCount} reviews are") +
                 " strongly negative. Read them before you go.",
-            background = Color(0xFFFFF4E0),
+            background = com.example.trailmind.ui.theme.Pal.amberBg,
             tint = Amber
         )
     }
@@ -299,7 +299,7 @@ private fun ReviewCard(review: ReviewDto, canDelete: Boolean, onDelete: () -> Un
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(Modifier.padding(16.dp)) {
@@ -318,7 +318,7 @@ private fun ReviewCard(review: ReviewDto, canDelete: Boolean, onDelete: () -> Un
             Spacer(Modifier.height(6.dp))
             RatingStars(review.rating.toDouble())
             Spacer(Modifier.height(8.dp))
-            Text(review.text, fontSize = 13.sp, color = Color(0xFF333333))
+            Text(review.text, fontSize = 13.sp, color = com.example.trailmind.ui.theme.Pal.textBody)
             Spacer(Modifier.height(10.dp))
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),

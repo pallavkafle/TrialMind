@@ -35,9 +35,9 @@ import com.example.trailmind.util.LocationHelper
 import com.example.trailmind.util.Resource
 import kotlinx.coroutines.launch
 
-private val TextMuted = Color(0xFF6B7280)
-private val TextDark = Color(0xFF1A1A2E)
-private val EmergencyRed = Color(0xFFC62828)
+private val TextMuted: Color @Composable get() = com.example.trailmind.ui.theme.Pal.textMuted
+private val TextDark: Color @Composable get() = com.example.trailmind.ui.theme.Pal.textDark
+private val EmergencyRed: Color @Composable get() = com.example.trailmind.ui.theme.Pal.red
 
 // kept in the app so they show even with no internet
 private val emergencyNumbers = listOf(
@@ -105,7 +105,7 @@ fun EmergencyScreen(
     LaunchedEffect(Unit) { viewModel.loadDestinations() }
 
     Scaffold(
-        containerColor = Color(0xFFF5F7FA),
+        containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
@@ -114,7 +114,7 @@ fun EmergencyScreen(
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back") }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = EmergencyRed,
+                    containerColor = com.example.trailmind.ui.theme.Pal.redBar,
                     titleContentColor = Color.White,
                     navigationIconContentColor = Color.White
                 )
@@ -277,15 +277,15 @@ private fun ResultSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
-                .background(Color(0xFFFFF4E0))
+                .background(com.example.trailmind.ui.theme.Pal.amberBg)
                 .padding(14.dp),
             verticalAlignment = Alignment.Top
         ) {
-            Icon(Icons.Default.WarningAmber, contentDescription = null, tint = Color(0xFFB26A00), modifier = Modifier.size(18.dp))
+            Icon(Icons.Default.WarningAmber, contentDescription = null, tint = com.example.trailmind.ui.theme.Pal.amber, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
             Text(
                 r.message ?: "No mapped facility nearby. Call an emergency number.",
-                fontSize = 13.sp, color = Color(0xFF7A4A00)
+                fontSize = 13.sp, color = com.example.trailmind.ui.theme.Pal.amberText
             )
         }
         r.nearest_overall?.let {
@@ -308,8 +308,9 @@ private fun ResultSection(
     Text(r.attribution, fontSize = 11.sp, color = TextMuted, modifier = Modifier.padding(top = 4.dp))
 }
 
+@Composable
 private fun typeStyle(type: String): Pair<String, Color> = when (type) {
-    "hospital" -> "Hospital" to Color(0xFFC62828)
+    "hospital" -> "Hospital" to com.example.trailmind.ui.theme.Pal.red
     "clinic" -> "Clinic / health post" to Color(0xFF1565C0)
     "doctors" -> "Doctor" to Color(0xFF00796B)
     "rescue" -> "Rescue / ambulance" to Color(0xFFE65100)
@@ -330,7 +331,7 @@ private fun FacilityCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(Modifier.padding(16.dp)) {
@@ -338,13 +339,7 @@ private fun FacilityCard(
                 Column(Modifier.weight(1f)) {
                     Text(f.name, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = TextDark)
                     Spacer(Modifier.height(6.dp))
-                    Text(
-                        label, fontSize = 11.sp, color = color, fontWeight = FontWeight.Medium,
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(50))
-                            .background(color.copy(alpha = 0.12f))
-                            .padding(horizontal = 10.dp, vertical = 4.dp)
-                    )
+                    InfoTag(label, color)
                 }
                 Spacer(Modifier.width(8.dp))
                 Column(horizontalAlignment = Alignment.End) {
@@ -354,7 +349,7 @@ private fun FacilityCard(
             }
             if (phoneText != null) {
                 Spacer(Modifier.height(8.dp))
-                Text(phoneText, fontSize = 12.sp, color = Color(0xFF444444))
+                Text(phoneText, fontSize = 12.sp, color = com.example.trailmind.ui.theme.Pal.textBody)
             }
             Spacer(Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

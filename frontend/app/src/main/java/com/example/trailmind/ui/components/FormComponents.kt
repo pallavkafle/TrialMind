@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.sp
 import com.example.trailmind.ui.home.TrailBlue
 import com.example.trailmind.ui.home.TrailBlueFaint
 
-private val TextDark = Color(0xFF1A1A2E)
+private val TextDark: Color @Composable get() = com.example.trailmind.ui.theme.Pal.textDark
 
 @Composable
 fun SectionCard(
@@ -32,7 +32,7 @@ fun SectionCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(Modifier.padding(18.dp)) {
@@ -148,12 +148,12 @@ fun ErrorBox(message: String) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFFFDECEA))
+            .background(com.example.trailmind.ui.theme.Pal.errorBg)
             .padding(14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(Icons.Default.ErrorOutline, contentDescription = null, tint = Color(0xFFD32F2F), modifier = Modifier.size(18.dp))
+        Icon(Icons.Default.ErrorOutline, contentDescription = null, tint = com.example.trailmind.ui.theme.Pal.red, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(8.dp))
-        Text(message, color = Color(0xFFD32F2F), fontSize = 13.sp)
+        Text(message, color = com.example.trailmind.ui.theme.Pal.red, fontSize = 13.sp)
     }
 }

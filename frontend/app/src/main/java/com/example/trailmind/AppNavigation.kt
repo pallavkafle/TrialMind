@@ -137,7 +137,7 @@ fun AppNavigator() {
 
         composable(Routes.HOME) {
             // the Home header is white, so it needs dark status bar icons
-            StatusBarIcons(darkIcons = true)
+            StatusBarIcons(darkIcons = !com.example.trailmind.ui.theme.isAppDark())
             val user = remember { tokenStore.getUser() }
             HomeScreenWithDrawer(
                 userName = user?.name ?: "Traveller",

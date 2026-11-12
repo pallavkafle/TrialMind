@@ -29,9 +29,9 @@ import com.example.trailmind.ui.home.TrailBlue
 import com.example.trailmind.ui.home.TrailBlueFaint
 import com.example.trailmind.util.Resource
 
-private val TextMuted = Color(0xFF6B7280)
-private val TextDark = Color(0xFF1A1A2E)
-private val CardBorder = Color(0xFFE5E9F0)
+private val TextMuted: Color @Composable get() = com.example.trailmind.ui.theme.Pal.textMuted
+private val TextDark: Color @Composable get() = com.example.trailmind.ui.theme.Pal.textDark
+private val CardBorder: Color @Composable get() = MaterialTheme.colorScheme.outlineVariant
 
 private val cities = listOf(
     "Kathmandu", "Chitwan", "Pokhara", "Lumbini", "Itahari", "Surkhet", "Nepalgunj"
@@ -103,7 +103,7 @@ fun BudgetScreen(
     val (altitude, restricted, hasPorter) = destMeta[destination] ?: Triple(0, false, false)
 
     Scaffold(
-        containerColor = Color(0xFFF5F7FA),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { Text("Budget Estimator", fontWeight = FontWeight.SemiBold) },
@@ -154,7 +154,7 @@ fun BudgetScreen(
                         icon = if (restricted) Icons.Default.WarningAmber else Icons.Default.CheckCircle,
                         label = "Restricted area",
                         value = if (restricted) "Yes — permit" else "No",
-                        valueColor = if (restricted) Color(0xFFD32F2F) else TrailBlue,
+                        valueColor = if (restricted) com.example.trailmind.ui.theme.Pal.red else TrailBlue,
                         alignEnd = true
                     )
                 }
@@ -256,7 +256,7 @@ fun BudgetScreen(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(18.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                     ) {
                         Column(Modifier.padding(20.dp)) {
@@ -359,7 +359,7 @@ private fun CostLine(icon: ImageVector, label: String, value: Double) {
     ) {
         Icon(icon, contentDescription = null, tint = TrailBlue, modifier = Modifier.size(15.dp))
         Spacer(Modifier.width(8.dp))
-        Text(label, fontSize = 13.sp, color = Color(0xFF444444), modifier = Modifier.weight(1f))
+        Text(label, fontSize = 13.sp, color = com.example.trailmind.ui.theme.Pal.textBody, modifier = Modifier.weight(1f))
         Text("NPR ${"%,.0f".format(value)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = TextDark)
     }
 }

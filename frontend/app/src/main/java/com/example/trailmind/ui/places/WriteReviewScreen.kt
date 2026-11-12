@@ -24,8 +24,8 @@ import com.example.trailmind.ui.components.SectionCard
 import com.example.trailmind.ui.home.TrailBlue
 import com.example.trailmind.util.Resource
 
-private val TextMuted = Color(0xFF6B7280)
-private val TextDark = Color(0xFF1A1A2E)
+private val TextMuted: Color @Composable get() = com.example.trailmind.ui.theme.Pal.textMuted
+private val TextDark: Color @Composable get() = com.example.trailmind.ui.theme.Pal.textDark
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,7 +48,7 @@ fun WriteReviewScreen(
     }
 
     Scaffold(
-        containerColor = Color(0xFFF5F7FA),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { Text("Write a review", fontWeight = FontWeight.SemiBold) },

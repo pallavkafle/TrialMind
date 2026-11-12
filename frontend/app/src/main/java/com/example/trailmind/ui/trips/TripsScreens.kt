@@ -25,8 +25,8 @@ import com.example.trailmind.ui.plan.ItineraryScreen
 import com.example.trailmind.ui.plan.PlanTripViewModel
 import com.example.trailmind.util.Resource
 
-private val TextMuted = Color(0xFF6B7280)
-private val TextDark = Color(0xFF1A1A2E)
+private val TextMuted: Color @Composable get() = com.example.trailmind.ui.theme.Pal.textMuted
+private val TextDark: Color @Composable get() = com.example.trailmind.ui.theme.Pal.textDark
 
 private fun prettyDate(iso: String?): String {
     if (iso.isNullOrBlank()) return ""
@@ -74,7 +74,7 @@ fun MyTripsScreen(
     }
 
     Scaffold(
-        containerColor = Color(0xFFF5F7FA),
+        containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbar) },
         topBar = { TripsTopBar("My Trips", onBack) }
     ) { padding ->
@@ -126,7 +126,7 @@ fun MyTripsScreen(
                 TextButton(onClick = {
                     viewModel.delete(trip.id)
                     toDelete = null
-                }) { Text("Delete", color = Color(0xFFD32F2F)) }
+                }) { Text("Delete", color = com.example.trailmind.ui.theme.Pal.red) }
             },
             dismissButton = { TextButton(onClick = { toDelete = null }) { Text("Cancel") } }
         )
@@ -138,7 +138,7 @@ private fun TripCard(trip: TripSummaryDto, onClick: () -> Unit, onDelete: () -> 
     Card(
         modifier = Modifier.fillMaxWidth().clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(

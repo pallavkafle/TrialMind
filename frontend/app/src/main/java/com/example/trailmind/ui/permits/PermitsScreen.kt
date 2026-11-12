@@ -28,8 +28,8 @@ import com.example.trailmind.ui.components.*
 import com.example.trailmind.ui.home.TrailBlue
 import com.example.trailmind.util.Resource
 
-private val TextMuted = Color(0xFF6B7280)
-private val TextDark = Color(0xFF1A1A2E)
+private val TextMuted: Color @Composable get() = com.example.trailmind.ui.theme.Pal.textMuted
+private val TextDark: Color @Composable get() = com.example.trailmind.ui.theme.Pal.textDark
 
 private val nationalities = listOf("Domestic", "SAARC", "Foreign")
 private val months = listOf(
@@ -65,7 +65,7 @@ fun PermitsScreen(
     LaunchedEffect(Unit) { viewModel.loadDestinations() }
 
     Scaffold(
-        containerColor = Color(0xFFF5F7FA),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { Text("Permits & fees", fontWeight = FontWeight.SemiBold) },
@@ -162,7 +162,7 @@ private fun PermitResult(r: PermitCheckResponse) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(Modifier.padding(20.dp)) {
@@ -197,13 +197,13 @@ private fun PermitResult(r: PermitCheckResponse) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(14.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
             Column(Modifier.padding(16.dp)) {
                 Text(d.destination, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextDark)
                 d.notes.forEach {
-                    Text("•  $it", fontSize = 12.sp, color = Color(0xFF444444), modifier = Modifier.padding(top = 3.dp))
+                    Text("•  $it", fontSize = 12.sp, color = com.example.trailmind.ui.theme.Pal.textBody, modifier = Modifier.padding(top = 3.dp))
                 }
             }
         }
@@ -215,15 +215,15 @@ private fun PermitResult(r: PermitCheckResponse) {
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
-                .background(Color(0xFFFFF4E0))
+                .background(com.example.trailmind.ui.theme.Pal.amberBg)
                 .padding(14.dp),
             verticalAlignment = Alignment.Top
         ) {
-            Icon(Icons.Default.WarningAmber, contentDescription = null, tint = Color(0xFFB26A00), modifier = Modifier.size(18.dp))
+            Icon(Icons.Default.WarningAmber, contentDescription = null, tint = com.example.trailmind.ui.theme.Pal.amber, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
             Text(
                 "Check before you travel: ${r.needs_verification.joinToString("; ")}",
-                fontSize = 12.sp, color = Color(0xFF7A4A00)
+                fontSize = 12.sp, color = com.example.trailmind.ui.theme.Pal.amberText
             )
         }
     }
@@ -259,24 +259,18 @@ private fun PermitRow(p: PermitItemDto) {
         Spacer(Modifier.height(6.dp))
         ConfidencePill(p.confidence)
         if (!p.note.isNullOrBlank()) {
-            Text(p.note, fontSize = 12.sp, color = Color(0xFF555555), modifier = Modifier.padding(top = 6.dp))
+            Text(p.note, fontSize = 12.sp, color = com.example.trailmind.ui.theme.Pal.textBody, modifier = Modifier.padding(top = 6.dp))
         }
     }
-    HorizontalDivider(color = Color(0xFFEEEEEE))
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 }
 
 @Composable
 private fun ConfidencePill(confidence: String) {
     val (label, color) = when (confidence) {
-        "high" -> "High confidence" to Color(0xFF2E7D32)
-        "medium" -> "Medium confidence" to Color(0xFFB26A00)
-        else -> "Low confidence" to Color(0xFFD32F2F)
+        "high" -> "High confidence" to com.example.trailmind.ui.theme.Pal.green
+        "medium" -> "Medium confidence" to com.example.trailmind.ui.theme.Pal.amber
+        else -> "Low confidence" to com.example.trailmind.ui.theme.Pal.red
     }
-    Text(
-        label, fontSize = 11.sp, color = color, fontWeight = FontWeight.Medium,
-        modifier = Modifier
-            .clip(RoundedCornerShape(50))
-            .background(color.copy(alpha = 0.12f))
-            .padding(horizontal = 10.dp, vertical = 4.dp)
-    )
+    InfoTag(label, color)
 }

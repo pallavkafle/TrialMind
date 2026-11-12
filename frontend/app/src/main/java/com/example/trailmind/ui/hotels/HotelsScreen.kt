@@ -39,9 +39,9 @@ import com.example.trailmind.util.LocationHelper
 import com.example.trailmind.util.Resource
 import kotlinx.coroutines.launch
 
-private val TextMuted = Color(0xFF6B7280)
-private val TextDark = Color(0xFF1A1A2E)
-private val Amber = Color(0xFFB26A00)
+private val TextMuted: Color @Composable get() = com.example.trailmind.ui.theme.Pal.textMuted
+private val TextDark: Color @Composable get() = com.example.trailmind.ui.theme.Pal.textDark
+private val Amber: Color @Composable get() = com.example.trailmind.ui.theme.Pal.amber
 
 private val typeFilters: List<Pair<String, String?>> = listOf(
     "All" to null,
@@ -121,7 +121,7 @@ fun HotelsScreen(
     }
 
     Scaffold(
-        containerColor = Color(0xFFF5F7FA),
+        containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
@@ -181,7 +181,7 @@ fun HotelsScreen(
                     Spacer(Modifier.height(8.dp))
                     Text(
                         "Location permission was denied. You can still pick a destination below.",
-                        fontSize = 12.sp, color = Color(0xFFC62828)
+                        fontSize = 12.sp, color = com.example.trailmind.ui.theme.Pal.red
                     )
                 }
 
@@ -298,7 +298,7 @@ private fun ResultSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
-                .background(Color(0xFFFFF4E0))
+                .background(com.example.trailmind.ui.theme.Pal.amberBg)
                 .padding(14.dp),
             verticalAlignment = Alignment.Top
         ) {
@@ -308,7 +308,7 @@ private fun ResultSection(
                 r.message
                     ?: "No place to stay is mapped within ${"%.0f".format(r.radius_km)} km. " +
                     "The map data may be incomplete. Try a larger distance or another destination.",
-                fontSize = 13.sp, color = Color(0xFF7A4A00)
+                fontSize = 13.sp, color = com.example.trailmind.ui.theme.Pal.amberText
             )
         }
         r.nearest_overall?.let {
@@ -335,6 +335,7 @@ private fun ResultSection(
     r.attribution?.let { Text(it, fontSize = 11.sp, color = TextMuted, modifier = Modifier.padding(top = 4.dp)) }
 }
 
+@Composable
 private fun typeStyle(type: String?): Pair<String, Color> = when (type) {
     "hotel" -> "Hotel" to Color(0xFF1565C0)
     "guest_house" -> "Guest house" to Color(0xFF00796B)
@@ -343,7 +344,7 @@ private fun typeStyle(type: String?): Pair<String, Color> = when (type) {
     "chalet" -> "Chalet" to Color(0xFF8D6E63)
     "apartment" -> "Apartment" to Color(0xFF3949AB)
     "alpine_hut" -> "Mountain hut" to Color(0xFFE65100)
-    "camp_site" -> "Camp site" to Color(0xFF2E7D32)
+    "camp_site" -> "Camp site" to com.example.trailmind.ui.theme.Pal.green
     null -> "Place to stay" to TextMuted
     else -> type.replace('_', ' ').replaceFirstChar { it.uppercase() } to TextMuted
 }
@@ -366,7 +367,7 @@ private fun HotelCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(Modifier.padding(16.dp)) {
@@ -390,7 +391,7 @@ private fun HotelCard(
             }
             if (phoneText != null) {
                 Spacer(Modifier.height(8.dp))
-                Text(phoneText, fontSize = 12.sp, color = Color(0xFF444444))
+                Text(phoneText, fontSize = 12.sp, color = com.example.trailmind.ui.theme.Pal.textBody)
             }
             Spacer(Modifier.height(10.dp))
             FlowRow(

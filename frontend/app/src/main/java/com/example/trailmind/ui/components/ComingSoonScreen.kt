@@ -37,9 +37,9 @@ fun ComingSoonScreen(name: String, onBack: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text("$title is coming soon", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1A1A2E))
+            Text("$title is coming soon", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = com.example.trailmind.ui.theme.Pal.textDark)
             Spacer(Modifier.height(6.dp))
-            Text("This part of TrailMind is still being built.", fontSize = 13.sp, color = Color(0xFF6B7280))
+            Text("This part of TrailMind is still being built.", fontSize = 13.sp, color = com.example.trailmind.ui.theme.Pal.textMuted)
         }
     }
 }

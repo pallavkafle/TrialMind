@@ -27,10 +27,10 @@ import androidx.compose.ui.unit.sp
 // ─────────────────────────────────────────────
 // Brand Colors — reused throughout the app
 // ─────────────────────────────────────────────
-val TrailBlue = com.example.trailmind.ui.theme.TrailBlue
+val TrailBlue: Color @Composable get() = com.example.trailmind.ui.theme.Pal.blue
 val TrailBlueDark = com.example.trailmind.ui.theme.TrailBlueDark
 val TrailBlueMid = com.example.trailmind.ui.theme.TrailBlueMid
-val TrailBlueFaint = com.example.trailmind.ui.theme.TrailBlueFaint
+val TrailBlueFaint: Color @Composable get() = com.example.trailmind.ui.theme.Pal.blueFaint
 
 // ─────────────────────────────────────────────
 // DATA MODELS
@@ -88,7 +88,7 @@ fun HomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF5F7FA))
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(scrollState)
     ) {
         HomeTopHeader(onMenuClick = onMenuClick)
@@ -123,7 +123,7 @@ fun HomeTopHeader(onMenuClick: () -> Unit = {}) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.surface)
             .statusBarsPadding()
             .padding(horizontal = 20.dp, vertical = 14.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -148,11 +148,14 @@ fun HomeTopHeader(onMenuClick: () -> Unit = {}) {
             Spacer(Modifier.width(12.dp))
             Column {
                 Text("Good Morning 👋", fontSize = 13.sp, color = Color(0xFF888888))
-                Text("Where to next?", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1A1A2E))
+                Text("Where to next?", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = com.example.trailmind.ui.theme.Pal.textDark)
             }
         }
 
-        Box(
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            com.example.trailmind.ui.theme.ThemeToggleButton()
+            Spacer(Modifier.width(10.dp))
+            Box(
             modifier = Modifier
                 .size(42.dp)
                 .clip(CircleShape)
@@ -166,6 +169,7 @@ fun HomeTopHeader(onMenuClick: () -> Unit = {}) {
                 tint = TrailBlue,
                 modifier = Modifier.size(22.dp)
             )
+        }
         }
     }
 }
@@ -318,7 +322,7 @@ fun CategoryGrid(
             text = "Explore",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF1A1A2E)
+            color = com.example.trailmind.ui.theme.Pal.textDark
         )
 
         Spacer(modifier = Modifier.height(14.dp))
@@ -355,7 +359,7 @@ fun CategoryTile(
             .aspectRatio(1f)
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
@@ -382,7 +386,7 @@ fun CategoryTile(
                 text = item.label,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color(0xFF333333)
+                color = com.example.trailmind.ui.theme.Pal.textBody
             )
         }
     }
@@ -408,7 +412,7 @@ fun PopularPlacesSection(
                 text = "Popular Places",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1A1A2E)
+                color = com.example.trailmind.ui.theme.Pal.textDark
             )
             TextButton(onClick = { /* navigate to all places later */ }) {
                 Text(
@@ -448,7 +452,7 @@ fun PlaceCard(
             .width(180.dp)
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
     ) {
         Column {
@@ -495,7 +499,7 @@ fun PlaceCard(
                     text = place.name,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1A1A2E),
+                    color = com.example.trailmind.ui.theme.Pal.textDark,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -544,7 +548,7 @@ fun PlaceCard(
                         Text(
                             text = place.rating.toString(),
                             fontSize = 11.sp,
-                            color = Color(0xFF555555),
+                            color = com.example.trailmind.ui.theme.Pal.textBody,
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -575,7 +579,7 @@ fun PlanTripChoiceSheet(
                 text = "How do you want to plan?",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1A1A2E)
+                color = com.example.trailmind.ui.theme.Pal.textDark
             )
             Spacer(Modifier.height(4.dp))
             Text(
@@ -633,9 +637,9 @@ private fun PlanOptionCard(
             }
             Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f)) {
-                Text(title, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF1A1A2E))
+                Text(title, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = com.example.trailmind.ui.theme.Pal.textDark)
                 Spacer(Modifier.height(2.dp))
-                Text(subtitle, fontSize = 12.sp, color = Color(0xFF666666))
+                Text(subtitle, fontSize = 12.sp, color = com.example.trailmind.ui.theme.Pal.textBody)
             }
             Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Color(0xFF999999))
         }

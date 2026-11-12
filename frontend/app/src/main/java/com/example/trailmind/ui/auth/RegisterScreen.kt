@@ -36,7 +36,7 @@ import com.example.trailmind.ui.theme.TrailBlueMid
 import com.example.trailmind.util.Resource
 
 @Composable
-fun RegisterScreen(
+private fun RegisterScreenContent(
     onRegisterSuccess: () -> Unit,
     onBackToLogin: () -> Unit,
     viewModel: RegisterViewModel = viewModel()
@@ -279,5 +279,15 @@ fun RegisterScreen(
                 Spacer(Modifier.height(40.dp))
             }
         }
+    }
+}
+
+@Composable
+fun RegisterScreen(
+    onRegisterSuccess: () -> Unit,
+    onBackToLogin: () -> Unit
+) {
+    com.example.trailmind.ui.theme.ForceLightTheme {
+        RegisterScreenContent(onRegisterSuccess = onRegisterSuccess, onBackToLogin = onBackToLogin)
     }
 }

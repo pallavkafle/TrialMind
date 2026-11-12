@@ -35,7 +35,7 @@ import com.example.trailmind.ui.theme.TrailBlueMid
 import com.example.trailmind.util.Resource
 
 @Composable
-fun LoginScreen(
+private fun LoginScreenContent(
     onLoginSuccess: () -> Unit,
     onSignUpClick: () -> Unit,
     viewModel: LoginViewModel = viewModel()
@@ -308,5 +308,15 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(40.dp))
             }
         }
+    }
+}
+
+@Composable
+fun LoginScreen(
+    onLoginSuccess: () -> Unit,
+    onSignUpClick: () -> Unit
+) {
+    com.example.trailmind.ui.theme.ForceLightTheme {
+        LoginScreenContent(onLoginSuccess = onLoginSuccess, onSignUpClick = onSignUpClick)
     }
 }

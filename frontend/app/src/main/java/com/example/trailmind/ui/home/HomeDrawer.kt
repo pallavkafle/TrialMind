@@ -121,16 +121,16 @@ fun HomeScreenWithDrawer(
                 // ── Pushes logout to the bottom ──
                 Spacer(Modifier.weight(1f))
 
-                HorizontalDivider(color = Color(0xFFEEEEEE))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
                 // ── Logout button, pinned at bottom ──
                 NavigationDrawerItem(
-                    label = { Text("Logout", color = Color(0xFFD32F2F)) },
+                    label = { Text("Logout", color = com.example.trailmind.ui.theme.Pal.red) },
                     icon = {
                         Icon(
                             Icons.AutoMirrored.Filled.ExitToApp,
                             contentDescription = "Logout",
-                            tint = Color(0xFFD32F2F)
+                            tint = com.example.trailmind.ui.theme.Pal.red
                         )
                     },
                     selected = false,
