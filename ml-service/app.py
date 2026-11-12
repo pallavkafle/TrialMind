@@ -150,6 +150,7 @@ class BudgetRequest(BaseModel):
     transport_mode: str = Field(..., example="Flight")
     use_guide: bool = Field(True, example=True)
     use_porter: bool = Field(True, example=True)
+    skip_ml: bool = Field(False, description="internal: skip the RF cross-check")
 
 
 class BudgetBreakdown(BaseModel):
@@ -211,7 +212,7 @@ def predict(req: BudgetRequest):
 
     # ── ML cross-check (RF model, independent estimate) ──
     ml_estimate = 0.0
-    if model is not None:
+    if model is not None and not req.skip_ml:
         altitude, restricted = DEST_META[req.destination]
         row = pd.DataFrame([{
             "Duration_Days": days, "Group_Size": group,
@@ -239,7 +240,7 @@ from api_routes import build_router
 app.include_router(build_router(DEST_META, COMPONENTS))
 
 from itinerary import build_itinerary_router
-app.include_router(build_itinerary_router(predict, BudgetRequest, transport_fare, DEST_META))
+app.include_router(build_itinerary_router(predict, BudgetRequest, transport_fare, DEST_META, CITIES))
 
 from safety import build_safety_router
 app.include_router(build_safety_router())

@@ -19,14 +19,14 @@ import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FuturesTimeout
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field, ValidationError
 
 from routing.destinations import DESTINATIONS
-from routing.router import journey_distance, macro_distance, optimize_multi_stop
+from routing.router import haversine, journey_distance, macro_distance, optimize_multi_stop
 
 load_dotenv()
 log = logging.getLogger("trailmind.itinerary")
@@ -160,6 +160,7 @@ class BudgetInfo(BaseModel):
     transport_npr: float
     total_npr: float
     per_person_npr: float
+    permit_by_stop: Dict[str, float] = Field(default_factory=dict)
 
 
 class ItineraryResponse(BaseModel):
@@ -348,8 +349,15 @@ def _fallback_days(order, alloc, leg_kms, start_city, start_km):
     return out
 
 
+def _nearest_stop(stops: List[str], city_xy) -> str:
+    """The stop closest to the starting city (the first given stop if the city is unknown)."""
+    if not city_xy:
+        return stops[0]
+    return min(stops, key=lambda s: haversine(city_xy, (DESTINATIONS[s][0], DESTINATIONS[s][1])))
+
+
 # ---------------- router ----------------
-def build_itinerary_router(predict_fn, budget_cls, transport_fare_fn, dest_meta) -> APIRouter:
+def build_itinerary_router(predict_fn, budget_cls, transport_fare_fn, dest_meta, cities) -> APIRouter:
     router = APIRouter()
 
     @router.post("/itinerary", response_model=ItineraryResponse)
@@ -374,7 +382,12 @@ def build_itinerary_router(predict_fn, budget_cls, transport_fare_fn, dest_meta)
             raise HTTPException(400, f"{len(stops)} stops need at least {len(stops)} days")
 
         # 2. route order + distances
-        order = optimize_multi_stop(stops, stops[0])[0] if len(stops) > 1 else stops
+        # the trip starts at the stop nearest the starting city; the rest is optimised from there
+        start = _nearest_stop(stops, cities.get(req.starting_city))
+        if len(stops) > 2:
+            order = optimize_multi_stop(stops, start)[0]
+        else:
+            order = [start] + [s for s in stops if s != start]
         leg_kms = [round(macro_distance(a, b), 1) for a, b in zip(order, order[1:])]
         comp = journey_distance(order)
 
@@ -384,6 +397,7 @@ def build_itinerary_router(predict_fn, budget_cls, transport_fare_fn, dest_meta)
         # 4. budget: per-stop components + start->first stop + inter-stop legs
         parts = {"permit": 0.0, "guide": 0.0, "porter": 0.0, "lodging": 0.0, "meals": 0.0}
         first_transport, start_km = 0.0, 0.0
+        permit_by_stop = {}
         for i, (stop, d) in enumerate(zip(order, alloc)):
             r = predict_fn(budget_cls(
                 starting_city=req.starting_city, destination=stop, duration_days=d,
@@ -391,9 +405,10 @@ def build_itinerary_router(predict_fn, budget_cls, transport_fare_fn, dest_meta)
                 nationality_category=req.nationality_category,
                 traveler_type=req.traveler_type, accommodation_tier=req.accommodation_tier,
                 transport_mode=req.transport_mode, use_guide=req.use_guide,
-                use_porter=req.use_porter))
+                use_porter=req.use_porter, skip_ml=True))
             b = r.breakdown
             parts["permit"] += b.permit_npr
+            permit_by_stop[stop] = b.permit_npr
             parts["guide"] += b.guide_npr
             parts["porter"] += b.porter_npr
             parts["lodging"] += b.lodging_npr
@@ -407,7 +422,8 @@ def build_itinerary_router(predict_fn, budget_cls, transport_fare_fn, dest_meta)
             permit_npr=round(parts["permit"], 2), guide_npr=round(parts["guide"], 2),
             porter_npr=round(parts["porter"], 2), lodging_npr=round(parts["lodging"], 2),
             meals_npr=round(parts["meals"], 2), transport_npr=round(transport, 2),
-            total_npr=round(total, 2), per_person_npr=round(total / req.group_size, 2))
+            total_npr=round(total, 2), per_person_npr=round(total / req.group_size, 2),
+            permit_by_stop={k: round(v, 2) for k, v in permit_by_stop.items()})
 
         # 5. deterministic safety notes
         notes = []
