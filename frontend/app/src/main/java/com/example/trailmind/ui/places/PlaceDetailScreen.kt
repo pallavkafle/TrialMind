@@ -324,9 +324,9 @@ private fun ReviewCard(review: ReviewDto, canDelete: Boolean, onDelete: () -> Un
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                when {
-                    label == null -> InfoTag("Analysis unavailable", TextMuted)
-                    label == "POSITIVE" -> InfoTag("Positive", Green)
+                when (label) {
+                    null -> InfoTag("Analysis unavailable", TextMuted)
+                    "POSITIVE" -> InfoTag("Positive", Green)
                     else -> InfoTag("Negative", Red)
                 }
                 when (flag) {

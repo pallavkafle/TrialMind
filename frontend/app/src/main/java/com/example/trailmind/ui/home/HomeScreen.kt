@@ -242,7 +242,7 @@ fun SearchBarPlaceholder() {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
-            .background(Color.White.copy(alpha = 0.95f))
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.95f))
             .clickable { /* navigate to search screen later */ }
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,

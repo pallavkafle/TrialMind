@@ -52,7 +52,7 @@ fun HomeScreenWithDrawer(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(
-                drawerContainerColor = Color.White,
+                                drawerContainerColor = MaterialTheme.colorScheme.surface,
                 modifier = Modifier.fillMaxWidth(0.78f)
             ) {
                 // ── Header: avatar + name + email ──
