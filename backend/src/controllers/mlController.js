@@ -1,6 +1,7 @@
 const asyncHandler = require("../utils/asyncHandler");
 const { callMl } = require("../services/mlClient");
 const { nationalityCategory } = require("../utils/nationality");
+const DESTINATIONS = require("../data/destinations.json");
 
 // if the app doesn't send a nationality category, derive it from the user's profile
 const withNationality = (req) => ({
@@ -16,11 +17,14 @@ const health = asyncHandler(async (req, res) => {
 
 // GET /api/ml/destinations?category=Trekking&q=everest   (public)
 const destinations = asyncHandler(async (req, res) => {
-  const qs = new URLSearchParams();
-  if (req.query.category) qs.set("category", String(req.query.category));
-  if (req.query.q) qs.set("q", String(req.query.q));
-  const suffix = qs.toString() ? `?${qs}` : "";
-  res.json({ success: true, data: await callMl(`/destinations${suffix}`) });
+  const category = String(req.query.category || "").toLowerCase();
+  const q = String(req.query.q || "").toLowerCase();
+  const data = DESTINATIONS.filter(
+    (d) =>
+      (!category || d.category.toLowerCase() === category) &&
+      (!q || d.name.toLowerCase().includes(q))
+  );
+  res.json({ success: true, data });
 });
 
 // POST /api/ml/budget

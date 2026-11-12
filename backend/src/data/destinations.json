@@ -1,0 +1,245 @@
+[
+  {
+    "name": "Pashupatinath",
+    "category": "Cultural",
+    "latitude": 27.7104,
+    "longitude": 85.3488,
+    "altitude_m": 1400,
+    "is_restricted": false,
+    "has_porter": false
+  },
+  {
+    "name": "Boudhanath",
+    "category": "Cultural",
+    "latitude": 27.7215,
+    "longitude": 85.362,
+    "altitude_m": 1400,
+    "is_restricted": false,
+    "has_porter": false
+  },
+  {
+    "name": "Swayambhunath",
+    "category": "Cultural",
+    "latitude": 27.7149,
+    "longitude": 85.2903,
+    "altitude_m": 1400,
+    "is_restricted": false,
+    "has_porter": false
+  },
+  {
+    "name": "Bhaktapur Durbar Square",
+    "category": "Cultural",
+    "latitude": 27.6722,
+    "longitude": 85.4278,
+    "altitude_m": 1401,
+    "is_restricted": false,
+    "has_porter": false
+  },
+  {
+    "name": "Lumbini",
+    "category": "Cultural",
+    "latitude": 27.4833,
+    "longitude": 83.276,
+    "altitude_m": 150,
+    "is_restricted": false,
+    "has_porter": false
+  },
+  {
+    "name": "Janakpur (Janaki Mandir)",
+    "category": "Cultural",
+    "latitude": 26.7288,
+    "longitude": 85.9256,
+    "altitude_m": 70,
+    "is_restricted": false,
+    "has_porter": false
+  },
+  {
+    "name": "Everest Base Camp",
+    "category": "Trekking",
+    "latitude": 28.0026,
+    "longitude": 86.8528,
+    "altitude_m": 5364,
+    "is_restricted": false,
+    "has_porter": true
+  },
+  {
+    "name": "Annapurna Circuit",
+    "category": "Trekking",
+    "latitude": 28.796,
+    "longitude": 83.821,
+    "altitude_m": 5416,
+    "is_restricted": false,
+    "has_porter": true
+  },
+  {
+    "name": "Langtang Valley",
+    "category": "Trekking",
+    "latitude": 28.2131,
+    "longitude": 85.5216,
+    "altitude_m": 3870,
+    "is_restricted": false,
+    "has_porter": true
+  },
+  {
+    "name": "Mardi Himal",
+    "category": "Trekking",
+    "latitude": 28.4033,
+    "longitude": 83.9333,
+    "altitude_m": 4500,
+    "is_restricted": false,
+    "has_porter": true
+  },
+  {
+    "name": "Manaslu Circuit",
+    "category": "Trekking",
+    "latitude": 28.55,
+    "longitude": 84.56,
+    "altitude_m": 5106,
+    "is_restricted": true,
+    "has_porter": true
+  },
+  {
+    "name": "Gokyo Lakes",
+    "category": "Trekking",
+    "latitude": 27.95,
+    "longitude": 86.6944,
+    "altitude_m": 4790,
+    "is_restricted": false,
+    "has_porter": true
+  },
+  {
+    "name": "Upper Mustang",
+    "category": "Trekking",
+    "latitude": 29.1892,
+    "longitude": 83.9631,
+    "altitude_m": 3840,
+    "is_restricted": true,
+    "has_porter": true
+  },
+  {
+    "name": "Muktinath",
+    "category": "Trekking",
+    "latitude": 28.8167,
+    "longitude": 83.8719,
+    "altitude_m": 3710,
+    "is_restricted": false,
+    "has_porter": false
+  },
+  {
+    "name": "Poon Hill (Ghorepani)",
+    "category": "Hiking",
+    "latitude": 28.4,
+    "longitude": 83.6858,
+    "altitude_m": 3210,
+    "is_restricted": false,
+    "has_porter": true
+  },
+  {
+    "name": "Nagarkot",
+    "category": "Hiking",
+    "latitude": 27.7172,
+    "longitude": 85.5208,
+    "altitude_m": 2175,
+    "is_restricted": false,
+    "has_porter": false
+  },
+  {
+    "name": "Shivapuri National Park",
+    "category": "Hiking",
+    "latitude": 27.811,
+    "longitude": 85.392,
+    "altitude_m": 2732,
+    "is_restricted": false,
+    "has_porter": false
+  },
+  {
+    "name": "Bandipur Trails",
+    "category": "Hiking",
+    "latitude": 27.9333,
+    "longitude": 84.4167,
+    "altitude_m": 1030,
+    "is_restricted": false,
+    "has_porter": false
+  },
+  {
+    "name": "Dhampus / Australian Camp",
+    "category": "Hiking",
+    "latitude": 28.2833,
+    "longitude": 83.8333,
+    "altitude_m": 2060,
+    "is_restricted": false,
+    "has_porter": true
+  },
+  {
+    "name": "Champadevi / Chandragiri Trail",
+    "category": "Hiking",
+    "latitude": 27.6333,
+    "longitude": 85.2333,
+    "altitude_m": 2552,
+    "is_restricted": false,
+    "has_porter": true
+  },
+  {
+    "name": "Sirubari",
+    "category": "Homestay",
+    "latitude": 27.9333,
+    "longitude": 83.75,
+    "altitude_m": 1700,
+    "is_restricted": false,
+    "has_porter": false
+  },
+  {
+    "name": "Ghalegaun",
+    "category": "Homestay",
+    "latitude": 28.3167,
+    "longitude": 84.3333,
+    "altitude_m": 2100,
+    "is_restricted": false,
+    "has_porter": false
+  },
+  {
+    "name": "Bhujung Village",
+    "category": "Homestay",
+    "latitude": 28.2833,
+    "longitude": 84.2333,
+    "altitude_m": 1600,
+    "is_restricted": false,
+    "has_porter": false
+  },
+  {
+    "name": "Amaltari Community Homestay",
+    "category": "Homestay",
+    "latitude": 27.5667,
+    "longitude": 84.1333,
+    "altitude_m": 180,
+    "is_restricted": false,
+    "has_porter": false
+  },
+  {
+    "name": "Chitwan National Park",
+    "category": "Wildlife",
+    "latitude": 27.5291,
+    "longitude": 84.3542,
+    "altitude_m": 415,
+    "is_restricted": false,
+    "has_porter": false
+  },
+  {
+    "name": "Bardia National Park",
+    "category": "Wildlife",
+    "latitude": 28.3833,
+    "longitude": 81.5,
+    "altitude_m": 415,
+    "is_restricted": false,
+    "has_porter": false
+  },
+  {
+    "name": "Sagarmatha National Park",
+    "category": "Wildlife",
+    "latitude": 27.8069,
+    "longitude": 86.7017,
+    "altitude_m": 3440,
+    "is_restricted": false,
+    "has_porter": true
+  }
+]

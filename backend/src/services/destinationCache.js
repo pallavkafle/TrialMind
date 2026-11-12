@@ -1,23 +1,13 @@
-const { callMl } = require("./mlClient");
+// The 27 curated destinations live in data/destinations.json, a snapshot of the ML service's
+// list. Refresh it with `node scripts/sync-destinations.js` (ML service running) if destinations
+// ever change. Keeping the list in Node means reviews, permits, weather, hotels and the hospital
+// lookup keep working when the ML service is down.
+const destinations = require("../data/destinations.json");
 
-const TTL_MS = 10 * 60 * 1000;
-let cache = { map: null, at: 0 };
+const map = new Map(destinations.map((d) => [d.name, { lat: d.latitude, lon: d.longitude }]));
+const names = new Set(map.keys());
 
-// name -> { lat, lon }, from the ML service, cached for 10 minutes
-const getDestinationMap = async () => {
-  if (cache.map && Date.now() - cache.at < TTL_MS) return cache.map;
-  try {
-    const list = await callMl("/destinations");
-    cache = {
-      map: new Map(list.map((d) => [d.name, { lat: d.latitude, lon: d.longitude }])),
-      at: Date.now(),
-    };
-  } catch (err) {
-    if (!cache.map) throw err; // nothing cached: surface the ML error
-  }
-  return cache.map; // on failure with a stale cache, keep using it
-};
-
-const getDestinationNames = async () => new Set((await getDestinationMap()).keys());
+const getDestinationMap = async () => map;
+const getDestinationNames = async () => names;
 
 module.exports = { getDestinationMap, getDestinationNames };
