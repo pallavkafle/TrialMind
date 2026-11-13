@@ -297,60 +297,74 @@ fun MapScreen(
                     shadowElevation = 4.dp,
                     color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
                 ) {
-                    Column(Modifier.padding(horizontal = 10.dp, vertical = 6.dp).widthIn(max = 290.dp)) {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            FilterChip(
-                                selected = showHospitals,
-                                onClick = {
-                                    val c = centerOf(holder)
-                                    mapVm.toggleHospitals(c.first, c.second)
-                                },
-                                label = { Text("Hospitals", fontSize = 12.sp) },
-                                leadingIcon = { Icon(Icons.Default.LocalHospital, contentDescription = null, modifier = Modifier.size(16.dp)) }
-                            )
-                            FilterChip(
-                                selected = showHotels,
-                                onClick = {
-                                    val c = centerOf(holder)
-                                    mapVm.toggleHotels(c.first, c.second)
-                                },
-                                label = { Text("Hotels", fontSize = 12.sp) },
-                                leadingIcon = { Icon(Icons.Default.Hotel, contentDescription = null, modifier = Modifier.size(16.dp)) }
-                            )
-                        }
-                        if (showHospitals || showHotels) {
-                            Spacer(Modifier.height(6.dp))
-                            Button(
-                                onClick = {
-                                    val c = centerOf(holder)
-                                    mapVm.searchArea(c.first, c.second)
-                                },
-                                shape = RoundedCornerShape(50),
-                                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 4.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = TrailBlue)
-                            ) {
-                                Icon(Icons.Default.Search, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
-                                Spacer(Modifier.width(6.dp))
-                                Text("Search this area", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                            }
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                "Squares: hospitals and hotels. Circles: destinations. Tap a marker for details.",
-                                fontSize = 11.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        } else if (m is MapMode.Route) {
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                "Route lines are straight lines between stops; real road distance is longer.",
-                                fontSize = 11.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        FilterChip(
+                            selected = showHospitals,
+                            onClick = {
+                                val c = centerOf(holder)
+                                mapVm.toggleHospitals(c.first, c.second)
+                            },
+                            label = { Text("Hospitals", fontSize = 12.sp) },
+                            leadingIcon = { Icon(Icons.Default.LocalHospital, contentDescription = null, modifier = Modifier.size(16.dp)) }
+                        )
+                        FilterChip(
+                            selected = showHotels,
+                            onClick = {
+                                val c = centerOf(holder)
+                                mapVm.toggleHotels(c.first, c.second)
+                            },
+                            label = { Text("Hotels", fontSize = 12.sp) },
+                            leadingIcon = { Icon(Icons.Default.Hotel, contentDescription = null, modifier = Modifier.size(16.dp)) }
+                        )
                     }
                 }
                 if (loading) {
                     LinearProgressIndicator(Modifier.fillMaxWidth().padding(top = 6.dp))
+                }
+            }
+
+            Column(
+                modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (showHospitals || showHotels) {
+                    Button(
+                        onClick = {
+                            val c = centerOf(holder)
+                            mapVm.searchArea(c.first, c.second)
+                        },
+                        shape = RoundedCornerShape(50),
+                        colors = ButtonDefaults.buttonColors(containerColor = TrailBlue)
+                    ) {
+                        Icon(Icons.Default.Search, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("Search this area", color = Color.White, fontWeight = FontWeight.SemiBold)
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    Surface(
+                        shape = RoundedCornerShape(10.dp),
+                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f)
+                    ) {
+                        Text(
+                            "Squares: hospitals and hotels. Circles: destinations. Tap a marker for details.",
+                            fontSize = 11.sp,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                        )
+                    }
+                } else if (m is MapMode.Route) {
+                    Surface(
+                        shape = RoundedCornerShape(10.dp),
+                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f)
+                    ) {
+                        Text(
+                            "Route lines are straight lines between stops; real road distance is longer.",
+                            fontSize = 11.sp,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                        )
+                    }
                 }
             }
         }
