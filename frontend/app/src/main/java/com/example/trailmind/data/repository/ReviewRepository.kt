@@ -9,7 +9,7 @@ import com.example.trailmind.util.Resource
 class ReviewRepository {
 
     suspend fun reviews(destination: String): Resource<ReviewListResponse> =
-        safeBodyCall("Could not load reviews") { ApiClient.gatewayApi.reviews(destination, 20) }
+        cachedBodyCall("reviews:$destination", "Could not load reviews") { ApiClient.gatewayApi.reviews(destination, 20) }
 
     suspend fun mine(): Resource<List<ReviewDto>> =
         safeApiCall("Could not load your reviews") { ApiClient.gatewayApi.myReviews() }

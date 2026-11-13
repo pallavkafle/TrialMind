@@ -86,7 +86,7 @@ object ApiClient {
             .addInterceptor(authInterceptor)
             .addInterceptor(sessionInterceptor)
             .addInterceptor(logging)
-            .connectTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(130, TimeUnit.SECONDS) // itinerary generation can take up to about 2 minutes
             .build()
     }

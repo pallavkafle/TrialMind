@@ -7,5 +7,5 @@ import com.example.trailmind.util.Resource
 
 class PermitRepository {
     suspend fun check(request: PermitCheckRequest): Resource<PermitCheckResponse> =
-        safeApiCall("Could not check permits") { ApiClient.gatewayApi.checkPermits(request) }
+        cachedApiCall("permits:${request.destinations.sorted().joinToString("|")}:${request.duration_days}:${request.group_size}:${request.travel_month}:${request.nationality_category}", "Could not check permits") { ApiClient.gatewayApi.checkPermits(request) }
 }

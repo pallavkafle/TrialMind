@@ -6,5 +6,5 @@ import com.example.trailmind.util.Resource
 
 class CurrencyRepository {
     suspend fun rates(): Resource<CurrencyRatesDto> =
-        safeApiCall("Could not load exchange rates") { ApiClient.gatewayApi.currencyRates() }
+        cachedApiCall("currency", "Could not load exchange rates", maxAgeMs = 3 * ONE_DAY_MS) { ApiClient.gatewayApi.currencyRates() }
 }

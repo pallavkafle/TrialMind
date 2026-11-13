@@ -14,7 +14,7 @@ class HotelRepository {
         type: String?,
         radiusKm: Int
     ): Resource<NearbyHotelsResponse> =
-        safeApiCall("Could not load places to stay") {
+        cachedApiCall("hotels:${destination ?: "%.2f,%.2f".format(lat, lon)}:${type ?: "all"}:$radiusKm", "Could not load places to stay") {
             ApiClient.gatewayApi.nearbyHotels(destination, lat, lon, type, LIMIT, radiusKm)
         }
 

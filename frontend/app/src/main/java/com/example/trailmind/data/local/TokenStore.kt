@@ -73,7 +73,10 @@ class TokenStore(context: Context) {
             null
         }
 
-    fun clear() = prefs.edit().clear().apply()
+    fun clear() {
+        prefs.edit().clear().apply()
+        OfflineCache.clearAsync()
+    }
 
     companion object {
         private const val FILE = "trailmind_secure_prefs"

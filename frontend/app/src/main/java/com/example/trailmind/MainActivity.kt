@@ -1,5 +1,6 @@
 package com.example.trailmind
 
+import com.example.trailmind.ui.components.OfflineOverlay
 import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -21,7 +22,7 @@ class MainActivity : ComponentActivity() {
         )
         setContent {
             TrailMindTheme {
-                AppNavigator()
+                OfflineOverlay { AppNavigator() }
             }
         }
     }

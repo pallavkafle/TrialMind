@@ -13,7 +13,7 @@ class HealthRepository {
         lon: Double?,
         type: String?
     ): Resource<NearestFacilitiesResponse> =
-        safeApiCall("Could not load nearby help") {
+        cachedApiCall("health:${destination ?: "%.2f,%.2f".format(lat, lon)}:${type ?: "all"}", "Could not load nearby help") {
             ApiClient.gatewayApi.nearestFacilities(destination, lat, lon, type, LIMIT, RADIUS_KM)
         }
 
