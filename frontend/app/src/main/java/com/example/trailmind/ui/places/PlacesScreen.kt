@@ -1,5 +1,6 @@
 package com.example.trailmind.ui.places
 
+import com.example.trailmind.ui.map.LocalMapActions
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -55,6 +56,7 @@ fun PlacesScreen(
     }
     var query by rememberSaveable { mutableStateOf("") }
     val state by viewModel.destinations.collectAsState()
+    val mapActions = LocalMapActions.current
 
     LaunchedEffect(Unit) { viewModel.load() }
 
@@ -68,10 +70,16 @@ fun PlacesScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back") }
                 },
+                actions = {
+                    IconButton(onClick = { mapActions.showAll() }) {
+                        Icon(Icons.Default.Map, contentDescription = "Show all places on map")
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = TrailBlue,
                     titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
+                    navigationIconContentColor = Color.White,
+                    actionIconContentColor = Color.White
                 )
             )
         }

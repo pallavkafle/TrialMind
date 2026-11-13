@@ -1,5 +1,6 @@
 package com.example.trailmind.ui.plan
 
+import com.example.trailmind.ui.map.LocalMapActions
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -41,6 +42,7 @@ fun ItineraryScreen(
     readOnly: Boolean = false
 ) {
     val saveState by viewModel.saveState.collectAsState()
+    val mapActions = LocalMapActions.current
     val snackbar = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) { viewModel.resetSave() }
@@ -167,6 +169,16 @@ fun ItineraryScreen(
                 )
             }
 
+            Spacer(Modifier.height(10.dp))
+            OutlinedButton(
+                onClick = { mapActions.showRoute(data.route.stops) },
+                modifier = Modifier.fillMaxWidth().height(48.dp),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                Icon(Icons.Default.Map, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("View route on map", fontWeight = FontWeight.SemiBold)
+            }
             Spacer(Modifier.height(18.dp))
             Text("Day by day", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextDark)
             Spacer(Modifier.height(10.dp))

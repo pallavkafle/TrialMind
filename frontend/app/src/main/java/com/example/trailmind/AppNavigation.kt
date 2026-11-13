@@ -1,5 +1,10 @@
 package com.example.trailmind
 
+import com.example.trailmind.ui.map.MapViewModel
+import com.example.trailmind.ui.map.MapScreen
+import com.example.trailmind.ui.map.MapActions
+import com.example.trailmind.ui.map.LocalMapActions
+import androidx.compose.runtime.CompositionLocalProvider
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.runtime.Composable
@@ -58,6 +63,7 @@ object Routes {
     const val PERMITS = "permits"
     const val EMERGENCY = "emergency"
     const val CURRENCY = "currency"
+    const val MAP = "map"
     const val HOTELS = "hotels?destination={destination}"
     const val PLACES = "places/{category}"
     const val PLACE = "place/{name}"
@@ -81,6 +87,14 @@ fun AppNavigator() {
     val authRepo = remember { AuthRepository(tokenStore) }
     val planVm: PlanTripViewModel = viewModel()
     val placesVm: PlacesViewModel = viewModel()
+    val mapVm: MapViewModel = viewModel()
+    val mapActions = remember(navController) {
+        MapActions(
+            showAll = { mapVm.showAll(); navController.navigate(Routes.MAP) },
+            showRoute = { stops -> mapVm.showRoute(stops); navController.navigate(Routes.MAP) },
+            focus = { name -> mapVm.focus(name); navController.navigate(Routes.MAP) }
+        )
+    }
 
     // go to a route and drop everything behind it, so Back can't return to login/splash
     fun goClearingStack(route: String) {
@@ -98,6 +112,7 @@ fun AppNavigator() {
         }
     }
 
+    CompositionLocalProvider(LocalMapActions provides mapActions) {
     NavHost(navController = navController, startDestination = Routes.SPLASH) {
 
         composable(Routes.SPLASH) {
@@ -229,6 +244,10 @@ fun AppNavigator() {
             )
         }
 
+        composable(Routes.MAP) {
+            MapScreen(onBack = { navController.popBackStack() }, mapVm = mapVm, placesVm = placesVm)
+        }
+
         composable(Routes.PERMITS) {
             val nationality = remember { nationalityCategory(tokenStore.getUser()?.nationality) }
             PermitsScreen(
@@ -310,5 +329,6 @@ fun AppNavigator() {
                 onBack = { navController.popBackStack() }
             )
         }
+    }
     }
 }

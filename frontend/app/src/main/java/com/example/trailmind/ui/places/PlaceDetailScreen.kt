@@ -1,5 +1,6 @@
 package com.example.trailmind.ui.places
 
+import com.example.trailmind.ui.map.LocalMapActions
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -54,6 +55,7 @@ fun PlaceDetailScreen(
     val mine by viewModel.mine.collectAsState()
     val message by viewModel.message.collectAsState()
     val weather by weatherVm.state.collectAsState()
+    val mapActions = LocalMapActions.current
     val snackbar = remember { SnackbarHostState() }
     var toDelete by remember { mutableStateOf<ReviewDto?>(null) }
 
@@ -135,6 +137,17 @@ fun PlaceDetailScreen(
                 Icon(Icons.Default.Hotel, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
                 Text("Places to stay nearby", fontWeight = FontWeight.SemiBold)
+            }
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(
+                onClick = { mapActions.focus(name) },
+                modifier = Modifier.fillMaxWidth().height(48.dp),
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = TrailBlue)
+            ) {
+                Icon(Icons.Default.Map, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("View on map", fontWeight = FontWeight.SemiBold)
             }
             Spacer(Modifier.height(14.dp))
 

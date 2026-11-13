@@ -1,5 +1,6 @@
 package com.example.trailmind
 
+import com.example.trailmind.ui.map.MapConfig
 import com.example.trailmind.data.local.OfflineCache
 import android.app.Application
 import com.example.trailmind.data.remote.ApiClient
@@ -9,5 +10,6 @@ class TrailMindApp : Application() {
         super.onCreate()
         ApiClient.init(this)
         OfflineCache.init(this)
+        MapConfig.init(this)
     }
 }
