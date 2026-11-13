@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 
 class RegisterViewModel(app: Application) : AndroidViewModel(app) {
 
-    private val repo = AuthRepository(TokenStore(app.applicationContext))
+    private val repo = AuthRepository(TokenStore.get(app.applicationContext))
 
     private val _uiState = MutableStateFlow<Resource<UserDto>?>(null)
     val uiState: StateFlow<Resource<UserDto>?> = _uiState

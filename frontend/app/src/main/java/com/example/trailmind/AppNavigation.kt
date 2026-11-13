@@ -1,5 +1,7 @@
 package com.example.trailmind
 
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 import com.example.trailmind.ui.map.MapViewModel
 import com.example.trailmind.ui.map.MapScreen
 import com.example.trailmind.ui.map.MapActions
@@ -47,7 +49,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
 
 // the splash stays at least this long, even when the login check finishes sooner
-private const val MIN_SPLASH_MS = 1500L
+private const val MIN_SPLASH_MS = 1000L
 
 object Routes {
     const val SPLASH = "splash"
@@ -83,7 +85,7 @@ object Routes {
 fun AppNavigator() {
     val navController = rememberNavController()
     val context = LocalContext.current
-    val tokenStore = remember { TokenStore(context) }
+    val tokenStore = remember { TokenStore.get(context) }
     val authRepo = remember { AuthRepository(tokenStore) }
     val planVm: PlanTripViewModel = viewModel()
     val placesVm: PlacesViewModel = viewModel()
@@ -119,7 +121,7 @@ fun AppNavigator() {
             // the login check and the minimum splash time run together, not one after the other
             LaunchedEffect(Unit) {
                 val started = System.currentTimeMillis()
-                val hadToken = tokenStore.getToken() != null
+                val hadToken = withContext(Dispatchers.IO) { tokenStore.getToken() != null }
                 val state = if (hadToken) {
                     // wait at most 3 seconds; if the server cannot be reached the user still gets in
                     withTimeoutOrNull(3000) { authRepo.validateSession() } ?: SessionState.UNKNOWN

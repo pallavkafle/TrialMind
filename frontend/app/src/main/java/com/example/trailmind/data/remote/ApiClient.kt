@@ -24,7 +24,7 @@ object ApiClient {
 
     fun init(context: Context) {
         appContext = context.applicationContext
-        tokenStore = TokenStore(context.applicationContext)
+        tokenStore = TokenStore.get(context.applicationContext)
     }
 
     private fun isDebuggable(): Boolean {
@@ -101,4 +101,10 @@ object ApiClient {
 
     val authApi: AuthApi by lazy { retrofit.create(AuthApi::class.java) }
     val gatewayApi: GatewayApi by lazy { retrofit.create(GatewayApi::class.java) }
+
+    // builds the HTTP client and the API objects now (called on a background thread at app start)
+    fun warmUp() {
+        authApi.hashCode()
+        gatewayApi.hashCode()
+    }
 }

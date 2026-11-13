@@ -11,7 +11,7 @@ import java.security.KeyStore
 class TokenStore(context: Context) {
     private val appContext = context.applicationContext
     private val gson = Gson()
-    private val prefs: SharedPreferences = openPrefs()
+    private val prefs: SharedPreferences by lazy { openPrefs() }
 
     private fun createEncrypted(): SharedPreferences {
         val masterKey = MasterKey.Builder(appContext)
@@ -73,12 +73,25 @@ class TokenStore(context: Context) {
             null
         }
 
+    // opens the encrypted storage now (called on a background thread at app start)
+    fun warmUp() {
+        prefs.contains(KEY)
+    }
+
     fun clear() {
         prefs.edit().clear().apply()
         OfflineCache.clearAsync()
     }
 
     companion object {
+        @Volatile
+        private var instance: TokenStore? = null
+
+        fun get(context: Context): TokenStore =
+            instance ?: synchronized(this) {
+                instance ?: TokenStore(context.applicationContext).also { instance = it }
+            }
+
         private const val FILE = "trailmind_secure_prefs"
         private const val KEYSET_FILE = "__androidx_security_crypto_encrypted_prefs__"
         private const val MASTER_KEY_ALIAS = "_androidx_security_master_key_"
