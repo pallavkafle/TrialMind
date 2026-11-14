@@ -1,5 +1,6 @@
 package com.example.trailmind
 
+import com.example.trailmind.ui.chat.ChatTripScreen
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
 import com.example.trailmind.ui.map.MapViewModel
@@ -192,12 +193,12 @@ fun AppNavigator() {
 
         composable(Routes.TRIP_CHAT) {
             val nationality = remember { nationalityCategory(tokenStore.getUser()?.nationality) }
-            PlanTripScreen(
-                isChat = true,
+            ChatTripScreen(
                 defaultNationality = nationality,
                 onBack = { navController.popBackStack() },
                 onResult = { navController.navigate(Routes.ITINERARY) },
-                viewModel = planVm
+                onUseForm = { navController.navigate(Routes.TRIP_WIZARD) },
+                planVm = planVm
             )
         }
 

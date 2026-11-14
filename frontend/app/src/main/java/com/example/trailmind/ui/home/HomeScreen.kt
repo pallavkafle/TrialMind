@@ -592,7 +592,7 @@ fun PlanTripChoiceSheet(
             PlanOptionCard(
                 icon = Icons.Default.Chat,
                 title = "Chat with AI Guide",
-                subtitle = "New to Nepal travel? Just talk it through — no forms.",
+                subtitle = "Describe your trip in your own words; we fill in the details and you can adjust them.",
                 onClick = { onDismiss(); onChooseAiChat() }
             )
             Spacer(Modifier.height(12.dp))

@@ -1,5 +1,7 @@
 package com.example.trailmind.data.remote
 
+import com.example.trailmind.data.remote.dto.ParsedTripDto
+import com.example.trailmind.data.remote.dto.ParseTripRequest
 import com.example.trailmind.data.remote.dto.BudgetRequest
 import com.example.trailmind.data.remote.dto.BudgetResponse
 import com.example.trailmind.data.remote.dto.CreateReviewRequest
@@ -100,4 +102,8 @@ interface GatewayApi {
         @Query("limit") limit: Int?,
         @Query("radius_km") radiusKm: Int?
     ): Response<ApiEnvelope<NearbyHotelsResponse>>
+
+    // free-text trip request -> checked fields (login required)
+    @POST("api/ml/parse-trip")
+    suspend fun parseTrip(@Body body: ParseTripRequest): Response<ApiEnvelope<ParsedTripDto>>
 }
