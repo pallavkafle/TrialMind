@@ -8,7 +8,8 @@ class AppActions(
     val openPlaces: () -> Unit,
     val openProfile: () -> Unit,
     val openSaved: () -> Unit,
-    val openSettings: () -> Unit
+    val openSettings: () -> Unit,
+    val openSearch: () -> Unit = {}
 )
 
 val LocalAppActions = compositionLocalOf { AppActions({}, {}, {}, {}, {}) }

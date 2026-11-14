@@ -1,5 +1,7 @@
 package com.example.trailmind.ui.places
 
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.FocusRequester
 import com.example.trailmind.ui.account.FavoriteHeart
 import com.example.trailmind.ui.map.LocalMapActions
 import androidx.compose.foundation.background
@@ -57,9 +59,13 @@ fun PlacesScreen(
     }
     var query by rememberSaveable { mutableStateOf("") }
     val state by viewModel.destinations.collectAsState()
+    val searchFocus = remember { FocusRequester() }
     val mapActions = LocalMapActions.current
 
-    LaunchedEffect(Unit) { viewModel.load() }
+    LaunchedEffect(Unit) {
+        viewModel.load()
+        if (initialCategory == "Search") runCatching { searchFocus.requestFocus() }
+    }
 
     val title = if (initialCategory != "All" && initialCategory in categories) initialCategory else "Places"
 
@@ -94,7 +100,7 @@ fun PlacesScreen(
                     label = { Text("Search places") },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = TrailBlue) },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().focusRequester(searchFocus),
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = TrailBlue,

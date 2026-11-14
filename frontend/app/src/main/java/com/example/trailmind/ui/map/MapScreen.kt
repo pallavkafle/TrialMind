@@ -174,7 +174,7 @@ fun MapScreen(
     LaunchedEffect(Unit) { placesVm.load() }
     LaunchedEffect(message) {
         message?.let {
-            snackbar.showSnackbar(it)
+            android.widget.Toast.makeText(context, it, android.widget.Toast.LENGTH_LONG).show()
             mapVm.clearMessage()
         }
     }

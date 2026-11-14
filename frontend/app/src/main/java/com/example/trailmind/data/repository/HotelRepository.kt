@@ -18,6 +18,12 @@ class HotelRepository {
             ApiClient.gatewayApi.nearbyHotels(destination, lat, lon, type, LIMIT, radiusKm)
         }
 
+    // a city hub such as Pokhara (Lakeside) or Namche; the server matches the name
+    suspend fun byCity(city: String, type: String?, radiusKm: Int): Resource<NearbyHotelsResponse> =
+        cachedApiCall("hotelcity:$city:${type ?: "all"}:$radiusKm", "Could not load places to stay") {
+            ApiClient.gatewayApi.nearbyHotelsByCity(city, type, LIMIT, radiusKm)
+        }
+
     companion object {
         private const val LIMIT = 15
     }

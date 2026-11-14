@@ -32,6 +32,7 @@ class HotelsViewModel : ViewModel() {
     private sealed interface Source {
         data class Place(val name: String) : Source
         data class Gps(val lat: Double, val lon: Double) : Source
+        data class City(val name: String) : Source
     }
 
     private var source: Source? = null
@@ -39,6 +40,12 @@ class HotelsViewModel : ViewModel() {
 
     fun searchPlace(name: String) {
         source = Source.Place(name)
+        _locating.value = false
+        load()
+    }
+
+    fun searchCity(name: String) {
+        source = Source.City(name)
         _locating.value = false
         load()
     }
@@ -85,6 +92,7 @@ class HotelsViewModel : ViewModel() {
             _result.value = when (s) {
                 is Source.Place -> repo.nearby(s.name, null, null, t, r)
                 is Source.Gps -> repo.nearby(null, s.lat, s.lon, t, r)
+                is Source.City -> repo.byCity(s.name, t, r)
             }
         }
     }

@@ -54,6 +54,10 @@ private val typeFilters: List<Pair<String, String?>> = listOf(
 
 private val radiusOptions = listOf(10, 25, 50)
 
+private val hotelAreas = listOf(
+    "Kathmandu", "Pokhara", "Sauraha", "Lukla", "Namche", "Jomsom", "Nepalgunj", "Itahari", "Surkhet"
+)
+
 // opens the dialer with the number filled in; it never places the call by itself
 private fun dialIntent(number: String) =
     Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + number.filter { it.isDigit() || it == '+' }))
@@ -203,6 +207,23 @@ fun HotelsScreen(
                     else -> CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.dp)
                 }
 
+                Spacer(Modifier.height(16.dp))
+                Text("or a popular area", fontSize = 12.sp, color = TextMuted)
+                Spacer(Modifier.height(8.dp))
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    hotelAreas.forEach { area ->
+                        AssistChip(
+                            onClick = {
+                                picked = ""
+                                viewModel.searchCity(area)
+                            },
+                            label = { Text(area, fontSize = 12.sp) }
+                        )
+                    }
+                }
                 Spacer(Modifier.height(16.dp))
                 Text("Type", fontSize = 12.sp, color = TextMuted, fontWeight = FontWeight.SemiBold)
                 Spacer(Modifier.height(6.dp))

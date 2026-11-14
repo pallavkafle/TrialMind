@@ -109,6 +109,15 @@ interface GatewayApi {
         @Query("radius_km") radiusKm: Int?
     ): Response<ApiEnvelope<NearbyHotelsResponse>>
 
+    // a city hub such as Pokhara or Namche (login required)
+    @GET("api/hotels/nearby")
+    suspend fun nearbyHotelsByCity(
+        @Query("city") city: String,
+        @Query("type") type: String?,
+        @Query("limit") limit: Int?,
+        @Query("radius_km") radiusKm: Int?
+    ): Response<ApiEnvelope<NearbyHotelsResponse>>
+
     // free-text trip request -> checked fields (login required)
     @POST("api/ml/parse-trip")
     suspend fun parseTrip(@Body body: ParseTripRequest): Response<ApiEnvelope<ParsedTripDto>>

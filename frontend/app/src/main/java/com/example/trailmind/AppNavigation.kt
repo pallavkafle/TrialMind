@@ -1,5 +1,6 @@
 package com.example.trailmind
 
+import com.example.trailmind.ui.settings.SettingsScreen
 import com.example.trailmind.ui.account.SavedPlacesScreen
 import com.example.trailmind.ui.account.ProfileScreen
 import com.example.trailmind.ui.account.LocalFavorites
@@ -76,6 +77,7 @@ object Routes {
     const val MAP = "map"
     const val PROFILE = "profile"
     const val SAVED = "saved_places"
+    const val SETTINGS = "settings"
     const val HOTELS = "hotels?destination={destination}"
     const val PLACES = "places/{category}"
     const val PLACE = "place/{name}"
@@ -108,7 +110,8 @@ fun AppNavigator() {
             openPlaces = { navController.navigate(Routes.places("All")) },
             openProfile = { navController.navigate(Routes.PROFILE) },
             openSaved = { navController.navigate(Routes.SAVED) },
-            openSettings = { navController.navigate(Routes.comingSoon("settings")) }
+            openSettings = { navController.navigate(Routes.SETTINGS) },
+            openSearch = { navController.navigate(Routes.places("Search")) }
         )
     }
     val mapActions = remember(navController) {
@@ -268,6 +271,10 @@ fun AppNavigator() {
                 onBack = { navController.popBackStack() },
                 planVm = planVm
             )
+        }
+
+        composable(Routes.SETTINGS) {
+            SettingsScreen(onBack = { navController.popBackStack() })
         }
 
         composable(Routes.PROFILE) {

@@ -40,6 +40,13 @@ object ThemePrefs {
             .getInt(KEY, SYSTEM)
     }
 
+    fun setMode(context: Context, value: Int) {
+        mode = value
+        context.applicationContext
+            .getSharedPreferences(FILE, Context.MODE_PRIVATE)
+            .edit().putInt(KEY, value).apply()
+    }
+
     fun setDark(context: Context, dark: Boolean) {
         mode = if (dark) DARK else LIGHT
         context.applicationContext

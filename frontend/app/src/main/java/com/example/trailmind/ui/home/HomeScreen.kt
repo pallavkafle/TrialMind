@@ -1,5 +1,6 @@
 package com.example.trailmind.ui.home
 
+import com.example.trailmind.ui.account.LocalAppActions
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -147,29 +148,13 @@ fun HomeTopHeader(onMenuClick: () -> Unit = {}) {
             }
             Spacer(Modifier.width(12.dp))
             Column {
-                Text("Good Morning 👋", fontSize = 13.sp, color = Color(0xFF888888))
+                Text(greeting() + " 👋", fontSize = 13.sp, color = Color(0xFF888888))
                 Text("Where to next?", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = com.example.trailmind.ui.theme.Pal.textDark)
             }
         }
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             com.example.trailmind.ui.theme.ThemeToggleButton()
-            Spacer(Modifier.width(10.dp))
-            Box(
-            modifier = Modifier
-                .size(42.dp)
-                .clip(CircleShape)
-                .background(TrailBlueFaint)
-                .clickable { /* notifications later */ },
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.Notifications,
-                contentDescription = "Notifications",
-                tint = TrailBlue,
-                modifier = Modifier.size(22.dp)
-            )
-        }
         }
     }
 }
@@ -238,18 +223,19 @@ fun HeroBanner() {
 // ─────────────────────────────────────────────
 @Composable
 fun SearchBarPlaceholder() {
+    val actions = LocalAppActions.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
                         .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.95f))
-            .clickable { /* navigate to search screen later */ }
+            .clickable { actions.openSearch() }
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            text = "Where want to go?",
+            text = "Where do you want to go?",
             color = Color(0xFF999999),
             fontSize = 14.sp
         )
@@ -643,5 +629,14 @@ private fun PlanOptionCard(
             }
             Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Color(0xFF999999))
         }
+    }
+}
+
+private fun greeting(): String {
+    val hour = java.time.LocalTime.now().hour
+    return when {
+        hour < 12 -> "Good Morning"
+        hour < 17 -> "Good Afternoon"
+        else -> "Good Evening"
     }
 }
