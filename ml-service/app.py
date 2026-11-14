@@ -244,3 +244,6 @@ app.include_router(build_itinerary_router(predict, BudgetRequest, transport_fare
 
 from safety import build_safety_router
 app.include_router(build_safety_router())
+
+from parse_trip import build_parse_router
+app.include_router(build_parse_router(CITIES))

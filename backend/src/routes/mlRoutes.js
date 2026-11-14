@@ -11,5 +11,6 @@ router.post("/budget", protect, ml.budget);
 router.post("/route", protect, ml.route);
 router.post("/itinerary", protect, ml.itinerary);
 router.post("/analyze-review", protect, ml.analyzeReview);
+router.post("/parse-trip", protect, ml.parseTrip);
 
 module.exports = router;

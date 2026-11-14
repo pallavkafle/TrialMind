@@ -113,4 +113,13 @@ const analyzeReview = asyncHandler(async (req, res) => {
   res.json({ success: true, data });
 });
 
-module.exports = { health, destinations, budget, route, itinerary, analyzeReview };
+// POST /api/ml/parse-trip   body: { text }   (reads a free-text trip request into checked fields)
+const parseTrip = asyncHandler(async (req, res) => {
+  const text = typeof req.body.text === "string" ? req.body.text.trim() : "";
+  if (text.length < 3 || text.length > 1000)
+    return res.status(400).json({ success: false, message: "Describe your trip in 3 to 1000 characters" });
+  const data = await callMl("/parse-trip", { method: "POST", body: { text }, timeoutMs: 45000 });
+  res.json({ success: true, data });
+});
+
+module.exports = { health, destinations, budget, route, itinerary, analyzeReview, parseTrip };
