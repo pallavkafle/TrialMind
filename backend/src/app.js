@@ -8,6 +8,8 @@ const healthRoutes = require("./routes/healthRoutes");
 const weatherRoutes = require("./routes/weatherRoutes");
 const currencyRoutes = require("./routes/currencyRoutes");
 const hotelRoutes = require("./routes/hotelRoutes");
+const favoriteRoutes = require("./routes/favoriteRoutes");
+const placeRoutes = require("./routes/placeRoutes");
 const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
@@ -29,6 +31,8 @@ app.use("/api/health-facilities", healthRoutes);
 app.use("/api/weather", weatherRoutes);
 app.use("/api/currency", currencyRoutes);
 app.use("/api/hotels", hotelRoutes);
+app.use("/api/favorites", favoriteRoutes);
+app.use("/api/places", placeRoutes);
 
 // unmatched routes
 app.use((req, res) =>

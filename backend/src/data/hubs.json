@@ -1,0 +1,47 @@
+[
+  {
+    "name": "Kathmandu (Thamel)",
+    "latitude": 27.7154,
+    "longitude": 85.3123
+  },
+  {
+    "name": "Pokhara (Lakeside)",
+    "latitude": 28.209,
+    "longitude": 83.959
+  },
+  {
+    "name": "Sauraha (Chitwan)",
+    "latitude": 27.578,
+    "longitude": 84.503
+  },
+  {
+    "name": "Lukla",
+    "latitude": 27.6869,
+    "longitude": 86.7314
+  },
+  {
+    "name": "Namche Bazaar",
+    "latitude": 27.8069,
+    "longitude": 86.714
+  },
+  {
+    "name": "Jomsom",
+    "latitude": 28.7806,
+    "longitude": 83.7239
+  },
+  {
+    "name": "Nepalgunj",
+    "latitude": 28.05,
+    "longitude": 81.6167
+  },
+  {
+    "name": "Itahari",
+    "latitude": 26.6646,
+    "longitude": 87.2718
+  },
+  {
+    "name": "Surkhet",
+    "latitude": 28.6006,
+    "longitude": 81.6339
+  }
+]

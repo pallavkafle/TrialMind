@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const asyncHandler = require("../utils/asyncHandler");
+const { isValidCountry } = require("../utils/country");
 
 const signToken = (userId) =>
   jwt.sign({ id: userId }, process.env.JWT_SECRET, {
@@ -22,6 +23,12 @@ const register = asyncHandler(async (req, res) => {
       success: false,
       message: "Password must be at least 8 characters",
     });
+  }
+
+  if (nationality !== undefined && !isValidCountry(nationality)) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Nationality must be a valid 2-letter country code" });
   }
 
   const exists = await User.findOne({ email: email.toLowerCase() });
@@ -79,4 +86,26 @@ const me = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, user: req.user.toSafeJSON() });
 });
 
-module.exports = { register, login, me };
+// PUT /api/auth/me   body: { name?, nationality? }   (protected)
+const updateMe = asyncHandler(async (req, res) => {
+  const { name, nationality } = req.body;
+  const bad = (message) => res.status(400).json({ success: false, message });
+  if (name === undefined && nationality === undefined)
+    return bad("Send a name or a nationality to update");
+
+  const update = {};
+  if (name !== undefined) {
+    const clean = typeof name === "string" ? name.trim() : "";
+    if (clean.length < 2 || clean.length > 60) return bad("Name must be 2 to 60 characters");
+    update.name = clean;
+  }
+  if (nationality !== undefined) {
+    if (!isValidCountry(nationality)) return bad("Nationality must be a valid 2-letter country code");
+    update.nationality = String(nationality).trim().toUpperCase();
+  }
+
+  const user = await User.findByIdAndUpdate(req.user._id, update, { new: true, runValidators: true });
+  res.status(200).json({ success: true, user: user.toSafeJSON() });
+});
+
+module.exports = { register, login, me, updateMe };

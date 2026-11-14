@@ -2,6 +2,14 @@ const asyncHandler = require("../utils/asyncHandler");
 const { getDestinationMap } = require("../services/destinationCache");
 const { haversineKm } = require("../utils/geo");
 
+// tourist hubs (Thamel, Pokhara Lakeside, ...) written by build_hotels.py
+let HUBS = [];
+try {
+  HUBS = require("../data/hubs.json");
+} catch (err) {
+  /* created by python -m routing.build_hotels */
+}
+
 let LODGINGS = [];
 try {
   LODGINGS = require("../data/hotels.json");
@@ -24,7 +32,7 @@ const nearby = asyncHandler(async (req, res) => {
       message: "Hotel data not built yet. Run: python -m routing.build_hotels (in ml-service)",
     });
 
-  const { destination, type } = req.query;
+  const { destination, type, city } = req.query;
   if (type && !TYPES.includes(String(type))) return bad(res, `type must be one of ${TYPES.join(", ")}`);
 
   let minStars = null;
@@ -35,14 +43,20 @@ const nearby = asyncHandler(async (req, res) => {
   }
 
   let lat, lon, destName;
-  if (destination) {
+  if (city) {
+    const hub = HUBS.find((h) => h.name.toLowerCase().startsWith(String(city).toLowerCase()));
+    if (!hub) return bad(res, `Unknown city: ${city}. Use one of: ${HUBS.map((h) => h.name).join(", ")}`);
+    lat = hub.latitude;
+    lon = hub.longitude;
+    destName = hub.name;
+  } else if (destination) {
     const d = (await getDestinationMap()).get(String(destination));
     if (!d) return bad(res, `Unknown destination: ${destination}`);
     ({ lat, lon } = d);
     destName = String(destination);
   } else {
     if (req.query.lat === undefined && req.query.lon === undefined)
-      return bad(res, "Provide destination or lat and lon");
+      return bad(res, "Provide city, destination, or lat and lon");
     lat = num(req.query.lat);
     lon = num(req.query.lon);
     if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180)
