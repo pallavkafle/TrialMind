@@ -10,6 +10,7 @@ const currencyRoutes = require("./routes/currencyRoutes");
 const hotelRoutes = require("./routes/hotelRoutes");
 const favoriteRoutes = require("./routes/favoriteRoutes");
 const placeRoutes = require("./routes/placeRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
@@ -33,6 +34,7 @@ app.use("/api/currency", currencyRoutes);
 app.use("/api/hotels", hotelRoutes);
 app.use("/api/favorites", favoriteRoutes);
 app.use("/api/places", placeRoutes);
+app.use("/api/admin", adminRoutes);
 
 // unmatched routes
 app.use((req, res) =>

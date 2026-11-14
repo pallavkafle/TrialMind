@@ -89,4 +89,6 @@ const getFeatured = async ({ limit, category }) => {
   });
 };
 
-module.exports = { getFeatured };
+const clearTypicalCache = () => cache.clear();
+
+module.exports = { getFeatured, clearTypicalCache };

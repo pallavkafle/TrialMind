@@ -6,11 +6,32 @@ const MONTHS = ["january", "february", "march", "april", "may", "june",
   "july", "august", "september", "october", "november", "december"];
 const KEY = { Domestic: "nepali", SAARC: "saarc", Foreign: "foreign" };
 
+// admin edits (stored in MongoDB) are layered over the defaults in data/permits.js
+let overrides = new Map();
+const setPermitOverrides = (list) => {
+  overrides = new Map(list.map((o) => [o.permitId, o]));
+};
+const effectivePermit = (id) => {
+  const base = PERMITS[id];
+  const ov = overrides.get(id);
+  if (!base || !ov) return base;
+  const merged = { ...base };
+  if (base.fee) {
+    merged.fee = { ...base.fee };
+    for (const k of ["nepali", "saarc", "foreign"]) {
+      if (ov.fee && Object.prototype.hasOwnProperty.call(ov.fee, k)) merged.fee[k] = ov.fee[k];
+    }
+  }
+  if (ov.confidence) merged.confidence = ov.confidence;
+  if (ov.note !== undefined && ov.note !== null) merged.note = ov.note;
+  return merged;
+};
+
 const monthIndex = (name) => MONTHS.indexOf(String(name || "").trim().toLowerCase());
 const hasPermitData = (destination) => (DESTINATION_PERMITS[destination] || []).length > 0;
 
 const describe = (id, category, days, monthIdx) => {
-  const p = PERMITS[id];
+  const p = effectivePermit(id);
   let fee = null;
   let note = p.note;
   if (p.restricted) {
@@ -60,4 +81,7 @@ const computePermits = ({ destinations, days, group, monthIdx, category }) => {
   };
 };
 
-module.exports = { AS_OF, ADVISORIES, MONTHS, KEY, monthIndex, hasPermitData, computePermits };
+module.exports = {
+  AS_OF, ADVISORIES, MONTHS, KEY, monthIndex, hasPermitData, computePermits,
+  setPermitOverrides, effectivePermit,
+};

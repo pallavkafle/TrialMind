@@ -23,6 +23,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       select: false, // never returned unless explicitly asked for
     },
+    role: { type: String, enum: ["user", "admin"], default: "user" },
     nationality: {
       type: String,
       default: "NP",
@@ -52,6 +53,7 @@ userSchema.methods.toSafeJSON = function () {
     name: this.name,
     email: this.email,
     nationality: this.nationality,
+    role: this.role,
   };
 };
 
