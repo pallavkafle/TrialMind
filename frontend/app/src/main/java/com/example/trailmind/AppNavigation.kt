@@ -1,5 +1,12 @@
 package com.example.trailmind
 
+import com.example.trailmind.ui.account.SavedPlacesScreen
+import com.example.trailmind.ui.account.ProfileScreen
+import com.example.trailmind.ui.account.LocalFavorites
+import com.example.trailmind.ui.account.LocalAppActions
+import com.example.trailmind.ui.account.FavoritesViewModel
+import com.example.trailmind.ui.account.FavoritesToaster
+import com.example.trailmind.ui.account.AppActions
 import com.example.trailmind.ui.chat.ChatTripScreen
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
@@ -67,6 +74,8 @@ object Routes {
     const val EMERGENCY = "emergency"
     const val CURRENCY = "currency"
     const val MAP = "map"
+    const val PROFILE = "profile"
+    const val SAVED = "saved_places"
     const val HOTELS = "hotels?destination={destination}"
     const val PLACES = "places/{category}"
     const val PLACE = "place/{name}"
@@ -91,6 +100,17 @@ fun AppNavigator() {
     val planVm: PlanTripViewModel = viewModel()
     val placesVm: PlacesViewModel = viewModel()
     val mapVm: MapViewModel = viewModel()
+
+    val favoritesVm: FavoritesViewModel = viewModel()
+    val appActions = remember(navController) {
+        AppActions(
+            openPlace = { name -> navController.navigate(Routes.place(name)) },
+            openPlaces = { navController.navigate(Routes.places("All")) },
+            openProfile = { navController.navigate(Routes.PROFILE) },
+            openSaved = { navController.navigate(Routes.SAVED) },
+            openSettings = { navController.navigate(Routes.comingSoon("settings")) }
+        )
+    }
     val mapActions = remember(navController) {
         MapActions(
             showAll = { mapVm.showAll(); navController.navigate(Routes.MAP) },
@@ -108,6 +128,7 @@ fun AppNavigator() {
     LaunchedEffect(Unit) {
         SessionEvents.unauthorized.collect {
             tokenStore.clear()
+            favoritesVm.reset()
             if (navController.currentDestination?.route != Routes.LOGIN) {
                 Toast.makeText(context, "Your session expired. Please log in again.", Toast.LENGTH_LONG).show()
                 goClearingStack(Routes.LOGIN)
@@ -115,7 +136,8 @@ fun AppNavigator() {
         }
     }
 
-    CompositionLocalProvider(LocalMapActions provides mapActions) {
+    CompositionLocalProvider(LocalMapActions provides mapActions, LocalAppActions provides appActions, LocalFavorites provides favoritesVm) {
+    FavoritesToaster()
     NavHost(navController = navController, startDestination = Routes.SPLASH) {
 
         composable(Routes.SPLASH) {
@@ -162,6 +184,7 @@ fun AppNavigator() {
                 userEmail = user?.email ?: "",
                 onLogout = {
                     tokenStore.clear()
+            favoritesVm.reset()
                     goClearingStack(Routes.LOGIN)
                 },
                 onBudgetClick = { navController.navigate(Routes.BUDGET) },
@@ -245,6 +268,14 @@ fun AppNavigator() {
                 onBack = { navController.popBackStack() },
                 planVm = planVm
             )
+        }
+
+        composable(Routes.PROFILE) {
+            ProfileScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable(Routes.SAVED) {
+            SavedPlacesScreen(onBack = { navController.popBackStack() }, placesVm = placesVm)
         }
 
         composable(Routes.MAP) {

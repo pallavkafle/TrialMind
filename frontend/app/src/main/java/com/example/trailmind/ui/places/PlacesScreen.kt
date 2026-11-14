@@ -1,5 +1,6 @@
 package com.example.trailmind.ui.places
 
+import com.example.trailmind.ui.account.FavoriteHeart
 import com.example.trailmind.ui.map.LocalMapActions
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -193,6 +194,7 @@ private fun PlaceCard(d: DestinationDto, onClick: () -> Unit) {
                     }
                 }
             }
+            FavoriteHeart(d.name)
             Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Color(0xFF999999))
         }
     }

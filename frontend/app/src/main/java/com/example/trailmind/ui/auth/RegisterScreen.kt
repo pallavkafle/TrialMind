@@ -1,5 +1,6 @@
 package com.example.trailmind.ui.auth
 
+import com.example.trailmind.ui.components.CountryField
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -47,6 +48,7 @@ private fun RegisterScreenContent(
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmVisible by remember { mutableStateOf(false) }
+    var nationality by remember { mutableStateOf("NP") }
 
     val isEmailValid = email.contains("@") && email.contains(".")
     val passwordsMatch = password.isNotEmpty() && password == confirmPassword
@@ -243,13 +245,15 @@ private fun RegisterScreenContent(
                                 Text("Passwords do not match", color = Color(0xFFD32F2F), fontSize = 12.sp)
                             }
                         }
+                        Spacer(Modifier.height(16.dp))
+                        CountryField(code = nationality, onChange = { nationality = it })
                         Spacer(Modifier.height(24.dp))
 
                         // Create account button
                         Button(
                             onClick = {
                                 keyboard?.hide()
-                                viewModel.register(name, email, password)
+                                viewModel.register(name, email, password, nationality)
                             },
                             enabled = isFormValid && !isLoading,
                             modifier = Modifier.fillMaxWidth().height(52.dp),

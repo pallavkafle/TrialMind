@@ -1,5 +1,6 @@
 package com.example.trailmind.ui.home
 
+import com.example.trailmind.ui.account.LocalAppActions
 import com.example.trailmind.ui.map.LocalMapActions
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -49,6 +50,7 @@ fun HomeScreenWithDrawer(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val mapActions = LocalMapActions.current
+    val appActions = LocalAppActions.current
     var selectedItem by remember { mutableStateOf("Home") }
 
     ModalNavigationDrawer(
@@ -111,6 +113,9 @@ fun HomeScreenWithDrawer(
                                 "Budget" -> onBudgetClick()
                                 "My Trips" -> onMyTripsClick()
                                 "Map" -> mapActions.showAll()
+                                "Saved Places" -> appActions.openSaved()
+                                "Profile" -> appActions.openProfile()
+                                "Settings" -> appActions.openSettings()
                             }
                         },
                         colors = NavigationDrawerItemDefaults.colors(

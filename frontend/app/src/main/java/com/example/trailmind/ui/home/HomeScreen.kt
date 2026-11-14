@@ -101,7 +101,7 @@ fun HomeScreen(
         Spacer(modifier = Modifier.height(24.dp))
         CategoryGrid(categories = categories, onCategoryClick = onCategoryClick)
         Spacer(modifier = Modifier.height(24.dp))
-        PopularPlacesSection(places = popularPlaces, onPlaceClick = onPlaceClick)
+        FeaturedPlacesSection()
         Spacer(modifier = Modifier.height(32.dp))
     }
 

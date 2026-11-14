@@ -1,5 +1,6 @@
 package com.example.trailmind.ui.places
 
+import com.example.trailmind.ui.account.FavoriteHeart
 import com.example.trailmind.ui.map.LocalMapActions
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -92,10 +93,14 @@ fun PlaceDetailScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back") }
                 },
+                actions = {
+                    FavoriteHeart(name, tint = Color.White)
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = TrailBlue,
                     titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
+                    navigationIconContentColor = Color.White,
+                    actionIconContentColor = Color.White
                 )
             )
         },

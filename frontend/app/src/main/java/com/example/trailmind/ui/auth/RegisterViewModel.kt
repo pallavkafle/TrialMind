@@ -18,7 +18,7 @@ class RegisterViewModel(app: Application) : AndroidViewModel(app) {
     private val _uiState = MutableStateFlow<Resource<UserDto>?>(null)
     val uiState: StateFlow<Resource<UserDto>?> = _uiState
 
-    fun register(name: String, email: String, password: String) {
+    fun register(name: String, email: String, password: String, nationality: String) {
         if (name.isBlank() || email.isBlank() || password.isBlank()) {
             _uiState.value = Resource.Error("All fields are required")
             return
@@ -29,7 +29,7 @@ class RegisterViewModel(app: Application) : AndroidViewModel(app) {
         }
         _uiState.value = Resource.Loading
         viewModelScope.launch {
-            _uiState.value = repo.register(name.trim(), email.trim(), password, "NP")
+            _uiState.value = repo.register(name.trim(), email.trim(), password, nationality)
         }
     }
 

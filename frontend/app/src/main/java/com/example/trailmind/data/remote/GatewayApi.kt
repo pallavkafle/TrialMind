@@ -1,5 +1,11 @@
 package com.example.trailmind.data.remote
 
+import com.example.trailmind.data.remote.dto.FeaturedDataDto
+import com.example.trailmind.data.remote.dto.FavoriteToggleDto
+import com.example.trailmind.data.remote.dto.FavoriteToggleRequest
+import com.example.trailmind.data.remote.dto.UpdateProfileRequest
+import com.example.trailmind.data.remote.dto.AuthResponse
+import retrofit2.http.PUT
 import com.example.trailmind.data.remote.dto.ParsedTripDto
 import com.example.trailmind.data.remote.dto.ParseTripRequest
 import com.example.trailmind.data.remote.dto.BudgetRequest
@@ -106,4 +112,22 @@ interface GatewayApi {
     // free-text trip request -> checked fields (login required)
     @POST("api/ml/parse-trip")
     suspend fun parseTrip(@Body body: ParseTripRequest): Response<ApiEnvelope<ParsedTripDto>>
+
+    // profile (login required): answers { success, user }
+    @PUT("api/auth/me")
+    suspend fun updateMe(@Body body: UpdateProfileRequest): Response<AuthResponse>
+
+    // saved places (login required)
+    @GET("api/favorites")
+    suspend fun favorites(): Response<ApiEnvelope<List<String>>>
+
+    @POST("api/favorites/toggle")
+    suspend fun toggleFavorite(@Body body: FavoriteToggleRequest): Response<ApiEnvelope<FavoriteToggleDto>>
+
+    // public: real popular places with review scores and a typical price
+    @GET("api/places/featured")
+    suspend fun featuredPlaces(
+        @Query("limit") limit: Int?,
+        @Query("category") category: String?
+    ): Response<ApiEnvelope<FeaturedDataDto>>
 }
