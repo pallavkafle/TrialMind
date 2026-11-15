@@ -22,11 +22,13 @@ const errorHandler = (err, req, res, next) => {
     return res.status(400).json({ success: false, message: "Invalid ID" });
   }
 
+  if (err.type === "entity.parse.failed")
+    return res.status(400).json({ success: false, message: "Invalid JSON body" });
+
+  // unexpected errors never leak internals; our own errors carry a friendly message and a statusCode
   const status = err.statusCode || 500;
-  res.status(status).json({
-    success: false,
-    message: err.message || "Internal server error",
-  });
+  const message = err.statusCode ? err.message : "Internal server error";
+  res.status(status).json({ success: false, message });
 };
 
 module.exports = errorHandler;

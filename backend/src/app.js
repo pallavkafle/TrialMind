@@ -12,10 +12,18 @@ const favoriteRoutes = require("./routes/favoriteRoutes");
 const placeRoutes = require("./routes/placeRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const errorHandler = require("./middleware/errorHandler");
+const {
+  helmetMw, corsMw, httpsOnly, apiLimiter, authLimiter, mlLimiter, itineraryLimiter, reviewLimiter,
+} = require("./middleware/security");
 
 const app = express();
 
-app.use(express.json());
+app.disable("x-powered-by");
+app.use(httpsOnly);
+app.use(helmetMw);
+app.use(corsMw);
+app.use("/api", apiLimiter);
+app.use(express.json({ limit: "200kb" }));
 app.use(express.urlencoded({ extended: true }));
 
 // quick sanity check from the browser / emulator
@@ -23,9 +31,14 @@ app.get("/api/health", (req, res) =>
   res.json({ success: true, message: "TrailMind API is running" })
 );
 
+app.use("/api/auth/login", authLimiter);
+app.use("/api/auth/register", authLimiter);
 app.use("/api/auth", authRoutes);
+app.use("/api/ml", mlLimiter);
+app.use("/api/ml/itinerary", itineraryLimiter);
 app.use("/api/ml", mlRoutes);
 app.use("/api/trips", tripRoutes);
+app.post("/api/reviews", reviewLimiter);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/permits", permitRoutes);
 app.use("/api/health-facilities", healthRoutes);

@@ -24,3 +24,8 @@ ml-service/routing/osm_cache/
 *.pyc
 .env
 
+# editor, temp and generated files
+.vscode/
+freeze_*.txt
+PROJECT_CONTEXT_FULL.md
+ml-service/route_map.html

@@ -37,6 +37,16 @@ const createReview = asyncHandler(async (req, res) => {
   const names = await getDestinationNames();
   if (!names.has(destination.trim())) return bad(res, `Unknown destination: ${destination}`);
 
+  const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const [forPlace, lastDay] = await Promise.all([
+    Review.countDocuments({ user: req.user._id, destination: destination.trim() }),
+    Review.countDocuments({ user: req.user._id, createdAt: { $gte: dayAgo } }),
+  ]);
+  if (forPlace >= 5)
+    return res.status(429).json({ success: false, message: "You have already written 5 reviews for this place" });
+  if (lastDay >= 30)
+    return res.status(429).json({ success: false, message: "Daily review limit reached, try again tomorrow" });
+
   let sentiment;
   try {
     const a = await callMl("/analyze-review", { method: "POST", body: { text: clean }, timeoutMs: 60000 });

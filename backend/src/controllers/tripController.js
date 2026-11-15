@@ -28,6 +28,9 @@ const createTrip = asyncHandler(async (req, res) => {
   if (!Number.isInteger(request.group_size))
     return bad(res, "request.group_size is required");
 
+  if ((await Trip.countDocuments({ user: req.user._id })) >= 100)
+    return res.status(429).json({ success: false, message: "Trip limit reached (100). Delete an old trip first." });
+
   const trip = await Trip.create({
     user: req.user._id,
     title: (typeof title === "string" && title.trim()) || itinerary.title || "My trip",
