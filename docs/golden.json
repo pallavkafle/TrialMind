@@ -1,5 +1,5 @@
 {
-  "recorded_at": "2026-11-16T14:03:26.304Z",
+  "recorded_at": "2026-11-16T14:34:40.667Z",
   "values": {
     "budget.ebc.permit_npr": 24000,
     "budget.ebc.total_npr": 458927.2,
@@ -44,9 +44,9 @@
       2
     ],
     "itinerary.ref.total_km": 140.8,
-    "itinerary.ref.permit_npr": 13952,
-    "itinerary.ref.total_npr": 215442,
-    "itinerary.ref.per_person_npr": 53860.5,
+    "itinerary.ref.permit_npr": 11952,
+    "itinerary.ref.total_npr": 213442,
+    "itinerary.ref.per_person_npr": 53360.5,
     "itinerary.ref.source": "fallback",
     "parse.stops": [
       "Pashupatinath",
