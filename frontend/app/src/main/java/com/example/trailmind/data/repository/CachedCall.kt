@@ -51,7 +51,7 @@ suspend fun <R, T> cachedCore(
                 Resource.Success(data)
             }
             res.code() == 401 -> Resource.Error("Your session expired. Please log in again.")
-            res.code() in 502..504 ->
+            res.code() in 502..504 || res.code() in 520..530 ->
                 fromCache(parseApiError(res.errorBody()?.string(), "$fallback (${res.code()})"))
             else -> Resource.Error(parseApiError(res.errorBody()?.string(), "$fallback (${res.code()})"))
         }

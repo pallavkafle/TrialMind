@@ -1,5 +1,6 @@
 package com.example.trailmind.data.remote
 
+import com.example.trailmind.data.local.ServerConfig
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.os.Build
@@ -17,7 +18,7 @@ object ApiClient {
     // Leave it empty to use the automatic choice below:
     //   emulator    -> http://10.0.2.2:5000/   (the host PC as the emulator sees it)
     //   real phone  -> http://127.0.0.1:5000/  (USB: run `adb reverse tcp:5000 tcp:5000` first)
-    private const val LAN_BASE_URL = ""
+    //private const val LAN_BASE_URL = ""
 
     private var appContext: Context? = null
     private var tokenStore: TokenStore? = null
@@ -42,14 +43,17 @@ object ApiClient {
             Build.PRODUCT.contains("sdk_gphone") ||
             Build.PRODUCT.contains("emulator")
 
-    private fun baseUrl(): String {
-        val lan = LAN_BASE_URL.trim()
-        return when {
-            lan.isNotEmpty() -> if (lan.endsWith("/")) lan else "$lan/"
-            isEmulator() -> "http://10.0.2.2:5000/"
-            else -> "http://127.0.0.1:5000/"
+    val baseUrl: String by lazy {
+        val ctx = appContext
+        val saved = ctx?.let { ServerConfig.saved(it) }
+        when {
+            !saved.isNullOrBlank() -> saved
+            isEmulator() -> ServerConfig.EMULATOR_URL
+            else -> ServerConfig.PUBLIC_URL
         }
     }
+
+    private fun baseUrl(): String = baseUrl
 
     // adds "Authorization: Bearer <token>" to every request that doesn't set its own
     private val authInterceptor = Interceptor { chain ->

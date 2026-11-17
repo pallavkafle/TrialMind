@@ -135,6 +135,10 @@ fun SettingsScreen(onBack: () -> Unit) {
 
             Spacer(Modifier.height(14.dp))
 
+            ServerAddressCard()
+
+            Spacer(Modifier.height(14.dp))
+
             SectionCard(title = "Data sources and credits", icon = Icons.Default.Public) {
                 credits.forEachIndexed { i, c ->
                     Column(
