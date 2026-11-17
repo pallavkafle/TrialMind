@@ -12,7 +12,7 @@ start "TrailMind ML service" /D "%ROOT%\ml-service" cmd /k "venv\Scripts\python.
 echo [3/5] Backend
 start "TrailMind backend" /D "%ROOT%\backend" cmd /k "npm start"
 echo [4/5] Tunnel
-start "TrailMind tunnel" cmd /k "cloudflared tunnel run trailmind"
+start "TrailMind tunnel" cmd /k ""C:\Program Files (x86)\cloudflared\cloudflared.exe" tunnel run trailmind"
 
 echo [5/5] Waiting for everything to answer (up to 3 minutes each)...
 call :wait "http://localhost:8000/health" "ML service"
